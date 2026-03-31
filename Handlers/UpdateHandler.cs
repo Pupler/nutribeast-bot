@@ -2,6 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using NutriBeastBot.Keyboards;
+using NutriBeastBot.Constants;
 
 namespace NutriBeastBot.Handlers;
 
@@ -40,10 +41,9 @@ public class UpdateHandler(
         switch(command)
         {
             case "/start":
-                var startText = "🔥 NutriBeast — your personal nutrition tracker!\n\nTrack calories, protein, fats & carbs to crush your goals 💪";
                 bot.SendMessage(
                     chatId,
-                    startText,
+                    text: BotTexts.StartMessage,
                     cancellationToken: ct,
                     replyMarkup: BotKeyboards.MainMenu()
                 );
