@@ -1,6 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using NutriBeastBot.Keyboards;
 
 namespace NutriBeastBot.Handlers;
 
@@ -31,10 +32,25 @@ public class UpdateHandler(
         }
 
         var text = update.Message.Text;
+        var command = text.Split(' ')[0];
         var chatId = update.Message.Chat.Id;
 
         logger.LogInformation("Message: {Text}", text);
-        bot.SendMessage(chatId, text, cancellationToken: ct);
+
+        switch(command)
+        {
+            case "/start":
+                var startText = "🔥 NutriBeast — your personal nutrition tracker!\n\nTrack calories, protein, fats & carbs to crush your goals 💪";
+                bot.SendMessage(
+                    chatId,
+                    startText,
+                    cancellationToken: ct,
+                    replyMarkup: BotKeyboards.MainMenu()
+                );
+                break;
+            default:
+                break;
+        }
 
         return Task.CompletedTask;
     }
