@@ -55,21 +55,35 @@ public class UpdateHandler(
         var text = update.Message.Text;
         var command = text.Split(' ')[0];
         var chatId = update.Message.Chat.Id;
+        var state = userStateService.GetState(chatId);
 
         logger.LogInformation("Message: {Text}", text);
 
-        switch(command)
+        if (state == UserState.Idle)
         {
-            case "/start":
-                await bot.SendMessage(
-                    chatId,
-                    text: BotTexts.StartMessage,
-                    cancellationToken: ct,
-                    replyMarkup: BotKeyboards.MainMenu()
-                );
-                break;
-            default:
-                break;
+            switch(command)
+            {
+                case "/start":
+                    await bot.SendMessage(
+                        chatId,
+                        text: BotTexts.StartMessage,
+                        cancellationToken: ct,
+                        replyMarkup: BotKeyboards.MainMenu()
+                    );
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (state == UserState.WaitingFoodName)
+        {
+            await bot.SendMessage(
+                chatId,
+                text: $"GOT IT: {text}",
+                cancellationToken: ct
+            );
+
+            userStateService.SetState(chatId, UserState.Idle);
         }
     }
 
