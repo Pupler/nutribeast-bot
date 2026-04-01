@@ -3,11 +3,14 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using NutriBeastBot.Keyboards;
 using NutriBeastBot.Constants;
+using NutriBeastBot.Services;
+using NutriBeastBot.Models;
 
 namespace NutriBeastBot.Handlers;
 
 public class UpdateHandler(
-    ILogger<UpdateHandler> logger
+    ILogger<UpdateHandler> logger,
+    UserStateService userStateService
 )
 {
     public Task HandleErrorAsync(
@@ -70,7 +73,7 @@ public class UpdateHandler(
         }
     }
 
-    public Task HandleCallbackAsync(
+    public async Task HandleCallbackAsync(
         ITelegramBotClient bot,
         Update update,
         CancellationToken ct
@@ -78,9 +81,21 @@ public class UpdateHandler(
     {
         if (update.CallbackQuery == null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        return Task.CompletedTask;
+        var data = update.CallbackQuery.Data;
+        var chatId = update.CallbackQuery.Message!.Chat.Id;
+
+        switch(data)
+        {
+            case "add_food":
+                await bot.SendMessage(chatId, text: "OKAY!", cancellationToken: ct);
+                userStateService.SetState(chatId, UserState.WaitingFoodName);
+                logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
+                break;
+            default:
+                break;
+        }
     }
 }

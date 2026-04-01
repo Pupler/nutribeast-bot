@@ -1,5 +1,6 @@
 using NutriBeastBot;
 using NutriBeastBot.Handlers;
+using NutriBeastBot.Services;
 using Telegram.Bot;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.AddSingleton<ITelegramBotClient>(
 );
 
 builder.Services.AddSingleton<UpdateHandler>();
+
+builder.Services.AddSingleton<UserStateService>();
 
 builder.Services.AddHostedService<Worker>();
 
