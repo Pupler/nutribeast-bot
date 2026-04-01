@@ -21,7 +21,24 @@ public class UpdateHandler(
         return Task.CompletedTask;
     }
 
-    public Task HandleUpdateAsync(
+    public async Task HandleUpdateAsync(
+        ITelegramBotClient bot,
+        Update update,
+        CancellationToken ct
+    )
+    {
+        if (update.Message != null)
+        {
+            await HandleMessageAsync(bot, update, ct);
+        }
+
+        if (update.CallbackQuery != null)
+        {
+            await HandleCallbackAsync(bot, update, ct);
+        }
+    }
+
+    public async Task HandleMessageAsync(
         ITelegramBotClient bot,
         Update update,
         CancellationToken ct
@@ -29,7 +46,7 @@ public class UpdateHandler(
     {
         if (update.Message?.Text == null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var text = update.Message.Text;
@@ -41,7 +58,7 @@ public class UpdateHandler(
         switch(command)
         {
             case "/start":
-                bot.SendMessage(
+                await bot.SendMessage(
                     chatId,
                     text: BotTexts.StartMessage,
                     cancellationToken: ct,
@@ -50,6 +67,18 @@ public class UpdateHandler(
                 break;
             default:
                 break;
+        }
+    }
+
+    public Task HandleCallbackAsync(
+        ITelegramBotClient bot,
+        Update update,
+        CancellationToken ct
+    )
+    {
+        if (update.CallbackQuery == null)
+        {
+            return Task.CompletedTask;
         }
 
         return Task.CompletedTask;
