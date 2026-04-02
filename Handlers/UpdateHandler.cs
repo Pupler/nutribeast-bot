@@ -108,10 +108,15 @@ public partial class UpdateHandler(
 
                 return;
             }
+            
+            var kcal = Math.Round(foodInfo.Calories * grams / 100, 1);
+            var protein = Math.Round(foodInfo.Protein * grams / 100, 1);
+            var fat = Math.Round(foodInfo.Fat * grams / 100, 1);
+            var carbs = Math.Round(foodInfo.Carbs * grams / 100, 1);
 
             await bot.SendMessage(
                 chatId,
-                text: $"{foodInfo.Calories}",
+                text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g",
                 cancellationToken: ct
             );
 
