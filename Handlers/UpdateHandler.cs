@@ -5,12 +5,14 @@ using NutriBeastBot.Keyboards;
 using NutriBeastBot.Constants;
 using NutriBeastBot.Services;
 using NutriBeastBot.Models;
+using Telegram.Bot.Types.Enums;
 
 namespace NutriBeastBot.Handlers;
 
-public class UpdateHandler(
+public partial class UpdateHandler(
     ILogger<UpdateHandler> logger,
-    UserStateService userStateService
+    UserStateService userStateService,
+    FoodParserService foodParserService
 )
 {
     public Task HandleErrorAsync(
@@ -77,9 +79,26 @@ public class UpdateHandler(
         }
         else if (state == UserState.WaitingFoodName)
         {
+            var parsed = foodParserService.Parse(text);
+
+            if (parsed == null)
+            {
+                await bot.SendMessage(
+                    chatId,
+                    text: "Invalid format!\nUse: `chicken breast 200g`",
+                    parseMode: ParseMode.Markdown,
+                    cancellationToken: ct
+                );
+
+                return;
+            }
+
+            var name = parsed.Value.Name;
+            var grams = parsed.Value.Grams;
+
             await bot.SendMessage(
                 chatId,
-                text: $"GOT IT: {text}",
+                text: $"Name of product: {name}\nGrams: {grams}g",
                 cancellationToken: ct
             );
 
@@ -104,7 +123,7 @@ public class UpdateHandler(
         switch(data)
         {
             case "add_food":
-                await bot.SendMessage(chatId, text: "OKAY!", cancellationToken: ct);
+                await bot.SendMessage(chatId, text: "Write your food name and grams:", cancellationToken: ct);
                 userStateService.SetState(chatId, UserState.WaitingFoodName);
                 logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
                 break;
