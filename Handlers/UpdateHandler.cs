@@ -12,7 +12,8 @@ namespace NutriBeastBot.Handlers;
 public partial class UpdateHandler(
     ILogger<UpdateHandler> logger,
     UserStateService userStateService,
-    FoodParserService foodParserService
+    FoodParserService foodParserService,
+    FoodApiService foodApiService
 )
 {
     public Task HandleErrorAsync(
@@ -95,10 +96,22 @@ public partial class UpdateHandler(
 
             var name = parsed.Value.Name;
             var grams = parsed.Value.Grams;
+            var foodInfo = await foodApiService.SearchFood(name);
+
+            if (foodInfo == null)
+            {
+                await bot.SendMessage(
+                    chatId,
+                    text: "Product not found!",
+                    cancellationToken: ct
+                );
+
+                return;
+            }
 
             await bot.SendMessage(
                 chatId,
-                text: $"Name of product: {name}\nGrams: {grams}g",
+                text: $"{foodInfo.Calories}",
                 cancellationToken: ct
             );
 

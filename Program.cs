@@ -1,6 +1,7 @@
 using NutriBeastBot;
 using NutriBeastBot.Handlers;
 using NutriBeastBot.Services;
+using Polly;
 using Telegram.Bot;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -10,12 +11,16 @@ builder.Services.AddSingleton<ITelegramBotClient>(
 );
 
 builder.Services.AddSingleton<UpdateHandler>();
-
 builder.Services.AddSingleton<UserStateService>();
-
 builder.Services.AddSingleton<FoodParserService>();
 
-builder.Services.AddHttpClient<FoodApiService>();
+builder.Services.AddHttpClient<FoodApiService>(client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "NutriBeastBot/1.0");
+})
+.AddTransientHttpErrorPolicy(policy => 
+    policy.WaitAndRetryAsync(5, retryAttempt => 
+        TimeSpan.FromSeconds(retryAttempt)));
 
 builder.Services.AddHostedService<Worker>();
 
