@@ -10,8 +10,12 @@ builder.Services.AddSingleton<ITelegramBotClient>(
 );
 
 builder.Services.AddSingleton<UpdateHandler>();
+
 builder.Services.AddSingleton<UserStateService>();
+
 builder.Services.AddSingleton<FoodParserService>();
+
+builder.Services.AddHttpClient<FoodApiService>();
 
 builder.Services.AddHostedService<Worker>();
 
