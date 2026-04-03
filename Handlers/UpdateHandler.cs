@@ -13,7 +13,8 @@ public partial class UpdateHandler(
     ILogger<UpdateHandler> logger,
     UserStateService userStateService,
     FoodParserService foodParserService,
-    FoodApiService foodApiService
+    FoodApiService foodApiService,
+    DatabaseService databaseService
 )
 {
     public Task HandleErrorAsync(
@@ -119,6 +120,17 @@ public partial class UpdateHandler(
                 text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g",
                 cancellationToken: ct
             );
+
+            await databaseService.LogFoodAsync(new FoodLog
+            {
+                ChatId = chatId,
+                Name = name,
+                Grams = grams,
+                Calories = kcal,
+                Protein = protein,
+                Fat = fat,
+                Carbs = carbs
+            });
 
             userStateService.SetState(chatId, UserState.Idle);
         }

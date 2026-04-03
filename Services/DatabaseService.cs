@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
+using NutriBeastBot.Models;
 
 namespace NutriBeastBot.Services;
 public class DatabaseService(IConfiguration configuration)
@@ -30,5 +31,15 @@ public class DatabaseService(IConfiguration configuration)
                 carbs REAL NOT NULL
             );
         ");
+    }
+
+    public async Task LogFoodAsync(FoodLog log)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        
+        await connection.ExecuteAsync(@"
+            INSERT INTO food_logs (chat_id, name, grams, calories, protein, fat, carbs)
+            VALUES (@ChatId, @Name, @Grams, @Calories, @Protein, @Fat, @Carbs)
+        ", log);
     }
 }
