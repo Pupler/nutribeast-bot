@@ -13,6 +13,7 @@ builder.Services.AddSingleton<ITelegramBotClient>(
 builder.Services.AddSingleton<UpdateHandler>();
 builder.Services.AddSingleton<UserStateService>();
 builder.Services.AddSingleton<FoodParserService>();
+builder.Services.AddSingleton<DatabaseService>();
 
 builder.Services.AddHttpClient<FoodApiService>(client =>
 {
@@ -25,4 +26,8 @@ builder.Services.AddHttpClient<FoodApiService>(client =>
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
+
+var db = host.Services.GetRequiredService<DatabaseService>();
+await db.InitializeAsync();
+
 host.Run();
