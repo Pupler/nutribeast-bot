@@ -157,6 +157,19 @@ public partial class UpdateHandler(
                 userStateService.SetState(chatId, UserState.WaitingFoodName);
                 logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
                 break;
+            case "check_today": 
+                var todayLog = await databaseService.GetTodayLogsAsync(chatId);
+                var totalKcal = todayLog.Sum(l => l.Calories);
+                var totalProtein = todayLog.Sum(l => l.Protein);
+                var totalFat = todayLog.Sum(l => l.Fat);
+                var totalCarbs = todayLog.Sum(l => l.Carbs);
+
+                await bot.SendMessage(
+                    chatId,
+                    text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g",
+                    cancellationToken: ct
+                );
+                break;
             default:
                 break;
         }

@@ -36,10 +36,21 @@ public class DatabaseService(IConfiguration configuration)
     public async Task LogFoodAsync(FoodLog log)
     {
         using var connection = new SqliteConnection(_connectionString);
-        
+
         await connection.ExecuteAsync(@"
             INSERT INTO food_logs (chat_id, name, grams, calories, protein, fat, carbs)
             VALUES (@ChatId, @Name, @Grams, @Calories, @Protein, @Fat, @Carbs)
         ", log);
+    }
+
+    public async Task<IEnumerable<FoodLog>> GetTodayLogsAsync(long chatId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        return await connection.QueryAsync<FoodLog>(@"
+            SELECT * FROM food_logs 
+            WHERE chat_id = @ChatId 
+            AND date(created_at) = date('now')
+        ", new { ChatId = chatId });
     }
 }
