@@ -20,7 +20,7 @@ builder.Services.AddHttpClient<FoodApiService>(client =>
     client.DefaultRequestHeaders.Add("User-Agent", "NutriBeastBot/1.0");
 })
 .AddTransientHttpErrorPolicy(policy => 
-    policy.WaitAndRetryAsync(5, retryAttempt => 
+    policy.WaitAndRetryAsync(10, retryAttempt => 
         TimeSpan.FromSeconds(retryAttempt)));
 
 builder.Services.AddHostedService<Worker>();

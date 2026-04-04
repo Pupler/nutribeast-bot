@@ -4,7 +4,8 @@ namespace NutriBeastBot.Services;
 
 public class UserStateService
 {
-    private Dictionary<long, UserState> _states = [];
+    private readonly Dictionary<long, UserState> _states = [];
+    private readonly Dictionary<long, FoodLog> _pendingLogs = [];
 
     public UserState GetState(long chatId)
     {
@@ -19,5 +20,20 @@ public class UserStateService
     public void SetState(long chatId, UserState state)
     {
         _states[chatId] = state;
+    }
+
+    public void SetPendingLog(long chatId, FoodLog log)
+    {
+        _pendingLogs[chatId] = log;
+    }
+
+    public FoodLog? GetPendingLog(long chatId)
+    {
+        if (_pendingLogs.TryGetValue(chatId, out var foodLog))
+        {
+            return foodLog;
+        }
+
+        return null;
     }
 }

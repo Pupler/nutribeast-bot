@@ -118,10 +118,11 @@ public partial class UpdateHandler(
             await bot.SendMessage(
                 chatId,
                 text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g",
-                cancellationToken: ct
+                cancellationToken: ct,
+                replyMarkup: BotKeyboards.FoodConfirmMenu()
             );
 
-            await databaseService.LogFoodAsync(new FoodLog
+            userStateService.SetPendingLog(chatId, new FoodLog
             {
                 ChatId = chatId,
                 Name = name,
@@ -132,7 +133,7 @@ public partial class UpdateHandler(
                 Carbs = carbs
             });
 
-            userStateService.SetState(chatId, UserState.Idle);
+            userStateService.SetState(chatId, UserState.WaitingConfirmation);
         }
     }
 
@@ -169,6 +170,22 @@ public partial class UpdateHandler(
                     text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g",
                     cancellationToken: ct
                 );
+                break;
+            case "food_confirm_add":
+                var foodLog = userStateService.GetPendingLog(chatId);
+
+                if ( foodLog != null)
+                {
+                    await databaseService.LogFoodAsync(foodLog);
+                }
+
+                await bot.SendMessage(
+                    chatId,
+                    text: "Added!",
+                    cancellationToken: ct
+                );
+
+                userStateService.SetState(chatId, UserState.Idle);
                 break;
             default:
                 break;

@@ -17,4 +17,16 @@ public class BotKeyboards()
             [ goal_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup FoodConfirmMenu()
+    {
+        var add_btn = InlineKeyboardButton.WithCallbackData("✅ Add", "food_confirm_add");
+        var cancel_btn = InlineKeyboardButton.WithCallbackData("🗑 Cancel", "food_cancel");
+        var edit_btn = InlineKeyboardButton.WithCallbackData("✏️ Edit", "food_edit");
+
+        return new InlineKeyboardMarkup([
+            [ add_btn ],
+            [ cancel_btn, edit_btn ]
+        ]);
+    }
 }
