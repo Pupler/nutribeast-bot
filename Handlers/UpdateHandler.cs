@@ -178,6 +178,15 @@ public partial class UpdateHandler(
                     cancellationToken: ct
                 );
                 break;
+            case "check_history": 
+                // In developing...
+
+                await bot.SendMessage(
+                    chatId,
+                    text: $"📊 Week's summary",
+                    cancellationToken: ct
+                );
+                break;
             case "food_confirm_add":
                 if (userStateService.GetState(chatId) == UserState.WaitingConfirmation)
                 {

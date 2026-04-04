@@ -53,4 +53,28 @@ public class DatabaseService(IConfiguration configuration)
             AND date(created_at) = date('now')
         ", new { ChatId = chatId });
     }
+
+    public async Task<IEnumerable<string>> GetDaysWithLogsAsync(long chatId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        return await connection.QueryAsync<string>(@"
+            SELECT DISTINCT date(created_at) as date 
+            FROM food_logs 
+            WHERE chat_id = @ChatId 
+            AND date(created_at) >= date('now', '-7 days')
+            ORDER BY date DESC
+        ", new { ChatId = chatId });
+    }
+
+    public async Task<IEnumerable<FoodLog>> GetLogsByDateAsync(long chatId, string date)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        return await connection.QueryAsync<FoodLog>(@"
+            SELECT * FROM food_logs
+            WHERE chat_id = @ChatId
+            AND date(created_at) = @Date
+        ", new { ChatId = chatId, Date = date });
+    }
 }
