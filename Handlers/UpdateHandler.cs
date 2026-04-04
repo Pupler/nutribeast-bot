@@ -179,12 +179,24 @@ public partial class UpdateHandler(
                 );
                 break;
             case "check_history": 
-                // In developing...
+                var days = await databaseService.GetDaysWithLogsAsync(chatId);
+                
+                if (!days.Any())
+                {
+                    await bot.SendMessage(
+                        chatId,
+                        text: "No history yet 📭",
+                        cancellationToken: ct
+                    );
+
+                    return;
+                }
 
                 await bot.SendMessage(
                     chatId,
-                    text: $"📊 Week's summary",
-                    cancellationToken: ct
+                    text: $"📅 Select a day:",
+                    cancellationToken: ct,
+                    replyMarkup: BotKeyboards.HistoryMenu(days)
                 );
                 break;
             case "food_confirm_add":

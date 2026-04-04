@@ -29,4 +29,11 @@ public class BotKeyboards()
             [ cancel_btn, edit_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup HistoryMenu(IEnumerable<string> dates)
+    {
+        var buttons = dates.Select(date => InlineKeyboardButton.WithCallbackData(date, $"history_{date}"));
+
+        return new InlineKeyboardMarkup(buttons);
+    }
 }
