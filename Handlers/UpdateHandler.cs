@@ -95,8 +95,15 @@ public partial class UpdateHandler(
                 return;
             }
 
-            var name = parsed.Value.Name;
+            var name = char.ToUpper(parsed.Value.Name[0]) + parsed.Value.Name[1..];
             var grams = parsed.Value.Grams;
+
+            await bot.SendMessage(
+                chatId,
+                text: $"Searching for {name}...",
+                cancellationToken: ct
+            );
+
             var foodInfo = await foodApiService.SearchFood(name);
 
             if (foodInfo == null)
@@ -172,16 +179,41 @@ public partial class UpdateHandler(
                 );
                 break;
             case "food_confirm_add":
-                var foodLog = userStateService.GetPendingLog(chatId);
-
-                if ( foodLog != null)
+                if (userStateService.GetState(chatId) == UserState.WaitingConfirmation)
                 {
-                    await databaseService.LogFoodAsync(foodLog);
+                    var foodLog = userStateService.GetPendingLog(chatId);
+
+                    if ( foodLog != null)
+                    {
+                        await databaseService.LogFoodAsync(foodLog);
+
+                        await bot.DeleteMessage(
+                            chatId,
+                            update.CallbackQuery.Message!.MessageId,
+                            cancellationToken: ct
+                        );
+
+                        await bot.SendMessage(
+                            chatId,
+                            text: "Added!",
+                            cancellationToken: ct
+                        );
+
+                        userStateService.SetState(chatId, UserState.Idle);
+                    }
                 }
+
+                break;
+            case "food_cancel":
+                await bot.DeleteMessage(
+                    chatId,
+                    update.CallbackQuery.Message!.MessageId,
+                    cancellationToken: ct
+                );
 
                 await bot.SendMessage(
                     chatId,
-                    text: "Added!",
+                    text: "Canceled!",
                     cancellationToken: ct
                 );
 
