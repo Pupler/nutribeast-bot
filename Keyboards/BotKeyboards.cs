@@ -32,7 +32,9 @@ public class BotKeyboards()
 
     public static InlineKeyboardMarkup HistoryMenu(IEnumerable<string> dates)
     {
-        var buttons = dates.Select(date => InlineKeyboardButton.WithCallbackData(date, $"history_{date}"));
+        var buttons = dates
+            .Select(date => InlineKeyboardButton.WithCallbackData(date, $"history_{date}"))
+            .Chunk(3);
 
         return new InlineKeyboardMarkup(buttons);
     }
