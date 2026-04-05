@@ -161,7 +161,12 @@ public partial class UpdateHandler(
         switch(data)
         {
             case "add_food":
-                await bot.SendMessage(chatId, text: "Write your food name and grams:", cancellationToken: ct);
+                await bot.SendMessage(
+                    chatId,
+                    text: "Write your food name and grams:",
+                    cancellationToken: ct
+                );
+                
                 userStateService.SetState(chatId, UserState.WaitingFoodName);
                 logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
                 break;
@@ -242,6 +247,34 @@ public partial class UpdateHandler(
                 break;
             default:
                 break;
+        }
+
+        if (data!.StartsWith("history_"))
+        {
+            var date = data.Replace("history_", "");
+            var dayLogs = await databaseService.GetLogsByDateAsync(chatId, date);
+
+            if (!dayLogs.Any())
+            {
+                await bot.SendMessage(
+                    chatId,
+                    text: "No logs for this day 📭",
+                    cancellationToken: ct
+                );
+                
+                return;
+            }
+
+            var totalCalories = dayLogs.Sum(l => l.Calories);
+            var totalProtein = dayLogs.Sum(l => l.Protein);
+            var totalFat = dayLogs.Sum(l => l.Fat);
+            var totalCarbs = dayLogs.Sum(l => l.Carbs);
+
+            await bot.SendMessage(
+                chatId,
+                text: $"📅 {date}\n\n🔥 Calories: {totalCalories} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g",
+                cancellationToken: ct
+            );
         }
     }
 }
