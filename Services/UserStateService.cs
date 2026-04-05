@@ -6,6 +6,7 @@ public class UserStateService
 {
     private readonly Dictionary<long, UserState> _states = [];
     private readonly Dictionary<long, FoodLog> _pendingLogs = [];
+    private readonly Dictionary<long, GoalSetup> _goalSetups = [];
 
     public UserState GetState(long chatId)
     {
@@ -32,6 +33,21 @@ public class UserStateService
         if (_pendingLogs.TryGetValue(chatId, out var foodLog))
         {
             return foodLog;
+        }
+
+        return null;
+    }
+
+    public void SetGoalSetup(long chatId, GoalSetup goalSetup)
+    {
+        _goalSetups[chatId] = goalSetup;
+    }
+
+    public GoalSetup? GetGoalSetup(long chatId)
+    {
+        if (_goalSetups.TryGetValue(chatId, out var goalSetup))
+        {
+            return goalSetup;
         }
 
         return null;

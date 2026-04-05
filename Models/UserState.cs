@@ -5,4 +5,7 @@ public enum UserState
     Idle,
     WaitingFoodName,
     WaitingConfirmation,
+    WaitingGoalWeight,
+    WaitingGoalHeight,
+    WaitingGoalAge,
 }
