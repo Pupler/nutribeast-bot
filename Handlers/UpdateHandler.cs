@@ -5,6 +5,7 @@ using NutriBeastBot.Keyboards;
 using NutriBeastBot.Constants;
 using NutriBeastBot.Services;
 using NutriBeastBot.Models;
+using NutriBeastBot.Extensions;
 using Telegram.Bot.Types.Enums;
 
 namespace NutriBeastBot.Handlers;
@@ -117,10 +118,10 @@ public partial class UpdateHandler(
                 return;
             }
             
-            var kcal = Math.Round(foodInfo.Calories * grams / 100, 1);
-            var protein = Math.Round(foodInfo.Protein * grams / 100, 1);
-            var fat = Math.Round(foodInfo.Fat * grams / 100, 1);
-            var carbs = Math.Round(foodInfo.Carbs * grams / 100, 1);
+            var kcal = (foodInfo.Calories * grams / 100).Round();
+            var protein = (foodInfo.Protein * grams / 100).Round();
+            var fat = (foodInfo.Fat * grams / 100).Round();
+            var carbs = (foodInfo.Carbs * grams / 100).Round();
 
             await bot.SendMessage(
                 chatId,
@@ -172,10 +173,11 @@ public partial class UpdateHandler(
                 break;
             case "check_today": 
                 var todayLog = await databaseService.GetTodayLogsAsync(chatId);
-                var totalKcal = todayLog.Sum(l => l.Calories);
-                var totalProtein = todayLog.Sum(l => l.Protein);
-                var totalFat = todayLog.Sum(l => l.Fat);
-                var totalCarbs = todayLog.Sum(l => l.Carbs);
+
+                var totalKcal = todayLog.Sum(l => l.Calories).Round();
+                var totalProtein = todayLog.Sum(l => l.Protein).Round();
+                var totalFat = todayLog.Sum(l => l.Fat).Round();
+                var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
 
                 await bot.SendMessage(
                     chatId,
@@ -246,35 +248,34 @@ public partial class UpdateHandler(
                 userStateService.SetState(chatId, UserState.Idle);
                 break;
             default:
+                if (data!.StartsWith("history_"))
+                {
+                    var date = data.Replace("history_", "");
+                    var dayLogs = await databaseService.GetLogsByDateAsync(chatId, date);
+
+                    if (!dayLogs.Any())
+                    {
+                        await bot.SendMessage(
+                            chatId,
+                            text: "No logs for this day 📭",
+                            cancellationToken: ct
+                        );
+
+                        return;
+                    }
+
+                    var totalDayKcal = dayLogs.Sum(l => l.Calories).Round();
+                    var totalDayProtein = dayLogs.Sum(l => l.Protein).Round();
+                    var totalDayFat = dayLogs.Sum(l => l.Fat).Round();
+                    var totalDayCarbs = dayLogs.Sum(l => l.Carbs).Round();
+
+                    await bot.SendMessage(
+                        chatId,
+                        text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g",
+                        cancellationToken: ct
+                    );
+                }
                 break;
-        }
-
-        if (data!.StartsWith("history_"))
-        {
-            var date = data.Replace("history_", "");
-            var dayLogs = await databaseService.GetLogsByDateAsync(chatId, date);
-
-            if (!dayLogs.Any())
-            {
-                await bot.SendMessage(
-                    chatId,
-                    text: "No logs for this day 📭",
-                    cancellationToken: ct
-                );
-                
-                return;
-            }
-
-            var totalCalories = dayLogs.Sum(l => l.Calories);
-            var totalProtein = dayLogs.Sum(l => l.Protein);
-            var totalFat = dayLogs.Sum(l => l.Fat);
-            var totalCarbs = dayLogs.Sum(l => l.Carbs);
-
-            await bot.SendMessage(
-                chatId,
-                text: $"📅 {date}\n\n🔥 Calories: {totalCalories} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g",
-                cancellationToken: ct
-            );
         }
     }
 }
