@@ -21,6 +21,7 @@ public class DatabaseService(IConfiguration configuration)
                 protein REAL NOT NULL,
                 fat REAL NOT NULL,
                 carbs REAL NOT NULL,
+                sugar REAL NOT NULL,
                 created_at TEXT NOT NULL DEFAULT (datetime('now'))
             );
             CREATE TABLE IF NOT EXISTS user_goals (
@@ -38,8 +39,8 @@ public class DatabaseService(IConfiguration configuration)
         using var connection = new SqliteConnection(_connectionString);
 
         await connection.ExecuteAsync(@"
-            INSERT INTO food_logs (chat_id, name, grams, calories, protein, fat, carbs)
-            VALUES (@ChatId, @Name, @Grams, @Calories, @Protein, @Fat, @Carbs)
+            INSERT INTO food_logs (chat_id, name, grams, calories, protein, fat, carbs, sugar)
+            VALUES (@ChatId, @Name, @Grams, @Calories, @Protein, @Fat, @Carbs, @Sugar)
         ", log);
     }
 

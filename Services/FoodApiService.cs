@@ -22,7 +22,8 @@ public class FoodApiService(HttpClient httpClient)
                 Calories = nutriments.GetProperty("energy-kcal_100g").GetDouble(),
                 Protein = nutriments.GetProperty("proteins_100g").GetDouble(),
                 Fat = nutriments.GetProperty("fat_100g").GetDouble(),
-                Carbs = nutriments.GetProperty("carbohydrates_100g").GetDouble()
+                Carbs = nutriments.GetProperty("carbohydrates_100g").GetDouble(),
+                Sugar = nutriments.GetProperty("sugars_100g").GetDouble()
             };
         }
         catch(Exception ex)

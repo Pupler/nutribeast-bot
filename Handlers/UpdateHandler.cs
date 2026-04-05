@@ -122,10 +122,11 @@ public partial class UpdateHandler(
             var protein = (foodInfo.Protein * grams / 100).Round();
             var fat = (foodInfo.Fat * grams / 100).Round();
             var carbs = (foodInfo.Carbs * grams / 100).Round();
+            var sugar = (foodInfo.Sugar * grams / 100).Round();
 
             await bot.SendMessage(
                 chatId,
-                text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g",
+                text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g (sugar: {sugar}g)",
                 cancellationToken: ct,
                 replyMarkup: BotKeyboards.FoodConfirmMenu()
             );
@@ -138,7 +139,8 @@ public partial class UpdateHandler(
                 Calories = kcal,
                 Protein = protein,
                 Fat = fat,
-                Carbs = carbs
+                Carbs = carbs,
+                Sugar = sugar
             });
 
             userStateService.SetState(chatId, UserState.WaitingConfirmation);
@@ -178,10 +180,11 @@ public partial class UpdateHandler(
                 var totalProtein = todayLog.Sum(l => l.Protein).Round();
                 var totalFat = todayLog.Sum(l => l.Fat).Round();
                 var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
+                var totalSugar = todayLog.Sum(l => l.Sugar).Round();
 
                 await bot.SendMessage(
                     chatId,
-                    text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g",
+                    text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g (sugar: {totalSugar}g)",
                     cancellationToken: ct
                 );
                 break;
@@ -268,10 +271,11 @@ public partial class UpdateHandler(
                     var totalDayProtein = dayLogs.Sum(l => l.Protein).Round();
                     var totalDayFat = dayLogs.Sum(l => l.Fat).Round();
                     var totalDayCarbs = dayLogs.Sum(l => l.Carbs).Round();
+                    var totalDaySugar = dayLogs.Sum(l => l.Sugar).Round();
 
                     await bot.SendMessage(
                         chatId,
-                        text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g",
+                        text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g (sugar: {totalDaySugar}g)",
                         cancellationToken: ct
                     );
                 }

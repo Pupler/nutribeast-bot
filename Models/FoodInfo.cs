@@ -7,4 +7,5 @@ public class FoodInfo
     public double Protein { get; set; }
     public double Fat { get; set; }
     public double Carbs { get; set; }
+    public double Sugar { get; set; }
 }
