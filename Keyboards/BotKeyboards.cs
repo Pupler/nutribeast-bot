@@ -38,4 +38,14 @@ public class BotKeyboards()
 
         return new InlineKeyboardMarkup(buttons);
     }
+
+    public static InlineKeyboardMarkup GenderMenu()
+    {
+        var male_btn = InlineKeyboardButton.WithCallbackData("👨 Male", "goal_gender_male");
+        var female_btn = InlineKeyboardButton.WithCallbackData("👩 Female", "goal_gender_female");
+
+        return new InlineKeyboardMarkup([
+            [ male_btn, female_btn ]
+        ]);
+    }
 }

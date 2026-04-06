@@ -169,6 +169,45 @@ public partial class UpdateHandler(
                 }
 
                 break;
+            case UserState.WaitingGoalHeight:
+                if (double.TryParse(text, out var parsedHeight))
+                {
+                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+                    setup.Height = parsedHeight;
+                    userStateService.SetGoalSetup(chatId, setup);
+                    userStateService.SetState(chatId, UserState.WaitingGoalAge);
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Enter your age:",
+                        cancellationToken: ct
+                    );
+                }
+                else
+                {
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Invalid height! Please enter a number (e.g. 180.5):",
+                        cancellationToken: ct
+                    );
+                }
+
+                break;
+            case UserState.WaitingGoalAge:
+                if (int.TryParse(text, out var parsedAge))
+                {
+                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+                    setup.Age = parsedAge;
+                    userStateService.SetGoalSetup(chatId, setup);
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Choose your gender:",
+                        cancellationToken: ct,
+                        replyMarkup: BotKeyboards.GenderMenu()
+                    );
+                }
+                break;
             default:
                 break;
         }
