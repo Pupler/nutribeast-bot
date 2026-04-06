@@ -64,86 +64,113 @@ public partial class UpdateHandler(
 
         logger.LogInformation("Message: {Text}", text);
 
-        if (state == UserState.Idle)
+        switch(state)
         {
-            switch(command)
-            {
-                case "/start":
+            case UserState.Idle:
+                switch(command)
+                {
+                    case "/start":
+                        await bot.SendMessage(
+                            chatId,
+                            text: BotTexts.StartMessage,
+                            cancellationToken: ct,
+                            replyMarkup: BotKeyboards.MainMenu()
+                        );
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case UserState.WaitingFoodName:
+                var parsedFood = foodParserService.Parse(text);
+
+                if (parsedFood == null)
+                {
                     await bot.SendMessage(
                         chatId,
-                        text: BotTexts.StartMessage,
-                        cancellationToken: ct,
-                        replyMarkup: BotKeyboards.MainMenu()
+                        text: "Invalid format!\nUse: `chicken breast 200g`",
+                        parseMode: ParseMode.Markdown,
+                        cancellationToken: ct
                     );
-                    break;
-                default:
-                    break;
-            }
-        }
-        else if (state == UserState.WaitingFoodName)
-        {
-            var parsed = foodParserService.Parse(text);
 
-            if (parsed == null)
-            {
+                    return;
+                }
+
+                var name = char.ToUpper(parsedFood.Value.Name[0]) + parsedFood.Value.Name[1..];
+                var grams = parsedFood.Value.Grams;
+
                 await bot.SendMessage(
                     chatId,
-                    text: "Invalid format!\nUse: `chicken breast 200g`",
-                    parseMode: ParseMode.Markdown,
+                    text: $"Searching for {name}...",
                     cancellationToken: ct
                 );
 
-                return;
-            }
+                var foodInfo = await foodApiService.SearchFood(name);
 
-            var name = char.ToUpper(parsed.Value.Name[0]) + parsed.Value.Name[1..];
-            var grams = parsed.Value.Grams;
+                if (foodInfo == null)
+                {
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Product not found!",
+                        cancellationToken: ct
+                    );
 
-            await bot.SendMessage(
-                chatId,
-                text: $"Searching for {name}...",
-                cancellationToken: ct
-            );
+                    return;
+                }
+                
+                var kcal = (foodInfo.Calories * grams / 100).Round();
+                var protein = (foodInfo.Protein * grams / 100).Round();
+                var fat = (foodInfo.Fat * grams / 100).Round();
+                var carbs = (foodInfo.Carbs * grams / 100).Round();
+                var sugar = (foodInfo.Sugar * grams / 100).Round();
 
-            var foodInfo = await foodApiService.SearchFood(name);
-
-            if (foodInfo == null)
-            {
                 await bot.SendMessage(
                     chatId,
-                    text: "Product not found!",
-                    cancellationToken: ct
+                    text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g (sugar: {sugar}g)",
+                    cancellationToken: ct,
+                    replyMarkup: BotKeyboards.FoodConfirmMenu()
                 );
 
-                return;
-            }
-            
-            var kcal = (foodInfo.Calories * grams / 100).Round();
-            var protein = (foodInfo.Protein * grams / 100).Round();
-            var fat = (foodInfo.Fat * grams / 100).Round();
-            var carbs = (foodInfo.Carbs * grams / 100).Round();
-            var sugar = (foodInfo.Sugar * grams / 100).Round();
+                userStateService.SetPendingLog(chatId, new FoodLog
+                {
+                    ChatId = chatId,
+                    Name = name,
+                    Grams = grams,
+                    Calories = kcal,
+                    Protein = protein,
+                    Fat = fat,
+                    Carbs = carbs,
+                    Sugar = sugar
+                });
 
-            await bot.SendMessage(
-                chatId,
-                text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g (sugar: {sugar}g)",
-                cancellationToken: ct,
-                replyMarkup: BotKeyboards.FoodConfirmMenu()
-            );
+                userStateService.SetState(chatId, UserState.WaitingConfirmation);
+                break;
+            case UserState.WaitingGoalWeight:
+                if (double.TryParse(text, out var parsedWeight))
+                {
+                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
 
-            userStateService.SetPendingLog(chatId, new FoodLog
-            {
-                ChatId = chatId,
-                Name = name,
-                Grams = grams,
-                Calories = kcal,
-                Protein = protein,
-                Fat = fat,
-                Carbs = carbs,
-                Sugar = sugar
-            });
+                    setup.Weight = parsedWeight;
+                    userStateService.SetGoalSetup(chatId, setup);
+                    userStateService.SetState(chatId, UserState.WaitingGoalHeight);
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Enter your height (cm):",
+                        cancellationToken: ct
+                    );
+                }
+                else
+                {
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Invalid weight! Please enter a number (e.g. 70.5):",
+                        cancellationToken: ct
+                    );
+                }
 
-            userStateService.SetState(chatId, UserState.WaitingConfirmation);
+                break;
+            default:
+                break;
         }
     }
 
@@ -249,6 +276,15 @@ public partial class UpdateHandler(
                 );
 
                 userStateService.SetState(chatId, UserState.Idle);
+                break;
+            case "manage_goal":
+                await bot.SendMessage(
+                    chatId,
+                    text: "Enter your body weight:",
+                    cancellationToken: ct
+                );
+
+                userStateService.SetState(chatId, UserState.WaitingGoalWeight);
                 break;
             default:
                 if (data!.StartsWith("history_"))
