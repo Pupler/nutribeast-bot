@@ -48,4 +48,15 @@ public class BotKeyboards()
             [ male_btn, female_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup GoalMenu()
+    {
+        var bulk_btn = InlineKeyboardButton.WithCallbackData("💪 Bulk", "aim_bulk");
+        var cut_btn = InlineKeyboardButton.WithCallbackData("🔥 Cut", "aim_cut");
+        var maintain_btn = InlineKeyboardButton.WithCallbackData("⚖️ Maintain", "aim_maintain");
+
+        return new InlineKeyboardMarkup([
+            [ bulk_btn, cut_btn, maintain_btn ]
+        ]);
+    }
 }

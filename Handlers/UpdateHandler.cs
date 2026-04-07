@@ -200,6 +200,7 @@ public partial class UpdateHandler(
 
                     setup.Age = parsedAge;
                     userStateService.SetGoalSetup(chatId, setup);
+                    userStateService.SetState(chatId, UserState.Idle);
                     await bot.SendMessage(
                         chatId,
                         text: "Choose your gender:",
@@ -326,6 +327,31 @@ public partial class UpdateHandler(
                 userStateService.SetState(chatId, UserState.WaitingGoalWeight);
                 break;
             default:
+                if (data!.StartsWith("goal_gender_"))
+                {
+                    string gender = data.Replace("goal_gender_", "");
+                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+                    setup.Gender = gender;
+                    userStateService.SetGoalSetup(chatId, setup);
+                    await bot.SendMessage(
+                        chatId,
+                        text: "Choose your goal:",
+                        cancellationToken: ct,
+                        replyMarkup: BotKeyboards.GoalMenu()
+                    );
+                }
+
+                if (data!.StartsWith("aim_"))
+                {
+                    string goal = data.Replace("aim_", "");
+                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+                    setup.Goal = goal;
+                    userStateService.SetGoalSetup(chatId, setup);
+                    // To be continued...
+                }
+
                 if (data!.StartsWith("history_"))
                 {
                     var date = data.Replace("history_", "");
