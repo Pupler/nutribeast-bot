@@ -350,9 +350,11 @@ public partial class UpdateHandler(
                     setup.Goal = goal;
                     userStateService.SetGoalSetup(chatId, setup);
 
+                    var macroGoal = TdeeCalculatorService.CalculateMacros(setup);
+
                     await bot.SendMessage(
                         chatId,
-                        text: $"{TdeeCalculatorService.CalculateMacros(setup)}",
+                        text: $"{macroGoal.Calories}, {macroGoal.Protein}, {macroGoal.Fat}, {macroGoal.Carbs}",
                         cancellationToken: ct
                     );
                 }

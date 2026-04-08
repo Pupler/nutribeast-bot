@@ -24,20 +24,26 @@ public class TdeeCalculatorService()
         return bmr;
     }
 
-    public static double CalculateMacros(GoalSetup setup)
+    public static MacroGoal CalculateMacros(GoalSetup setup)
     {
-        double goalMultiplier;
-
-        switch (setup.Goal)
+        double goalMultiplier = setup.Goal switch
         {
-            case "bulk":
-                goalMultiplier = 300;
-                return ((GetBMR(setup) * 1.55) + goalMultiplier).Round();
-            case "cut":
-                goalMultiplier = -400;
-                return ((GetBMR(setup) * 1.55) + goalMultiplier).Round();
-            default:
-                return (GetBMR(setup) * 1.55).Round();
-        }
+            "bulk" => 300,
+            "cut" => -400,
+            _ => 0
+        };
+
+        var goalKcal = GetBMR(setup) * 1.55 + goalMultiplier;
+        var goalProtein = setup.Weight * 2;
+        var goalFat = goalKcal * 0.25 / 9;
+        var remainingCalories = goalKcal - goalProtein * 4 - goalFat * 9;
+
+        return new MacroGoal
+        {
+            Calories = goalKcal.Round(),
+            Protein = goalProtein.Round(),
+            Fat = goalFat.Round(),
+            Carbs = (remainingCalories / 4).Round()
+        };
     }
 }
