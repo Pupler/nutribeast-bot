@@ -349,7 +349,12 @@ public partial class UpdateHandler(
 
                     setup.Goal = goal;
                     userStateService.SetGoalSetup(chatId, setup);
-                    // To be continued...
+
+                    await bot.SendMessage(
+                        chatId,
+                        text: $"{TdeeCalculatorService.CalculateMacros(setup)}",
+                        cancellationToken: ct
+                    );
                 }
 
                 if (data!.StartsWith("history_"))
