@@ -7,6 +7,7 @@ public class UserStateService
     private readonly Dictionary<long, UserState> _states = [];
     private readonly Dictionary<long, FoodLog> _pendingLogs = [];
     private readonly Dictionary<long, GoalSetup> _goalSetups = [];
+    private readonly Dictionary<long, MacroGoal> _macroGoals = [];
 
     public UserState GetState(long chatId)
     {
@@ -48,6 +49,21 @@ public class UserStateService
         if (_goalSetups.TryGetValue(chatId, out var goalSetup))
         {
             return goalSetup;
+        }
+
+        return null;
+    }
+
+    public void SetMacroGoal(long chatId, MacroGoal macroGoal)
+    {
+        _macroGoals[chatId] = macroGoal;
+    }
+
+    public MacroGoal? GetMacroGoal(long chatId)
+    {
+        if (_macroGoals.TryGetValue(chatId, out var macroGoal))
+        {
+            return macroGoal;
         }
 
         return null;

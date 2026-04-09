@@ -78,4 +78,21 @@ public class DatabaseService(IConfiguration configuration)
             AND date(created_at) = @Date
         ", new { ChatId = chatId, Date = date });
     }
+
+    public async Task LogGoal(long chatId, MacroGoal macroGoal)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        await connection.ExecuteAsync(@"
+            INSERT OR REPLACE INTO user_goals (chat_id, calories, protein, fat, carbs)
+            VALUES (@ChatId, @Calories, @Protein, @Fat, @Carbs)
+        ", new
+        {
+            ChatId = chatId,
+            macroGoal.Calories,
+            macroGoal.Protein,
+            macroGoal.Fat,
+            macroGoal.Carbs
+        });
+    }
 }

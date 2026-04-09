@@ -326,6 +326,31 @@ public partial class UpdateHandler(
 
                 userStateService.SetState(chatId, UserState.WaitingGoalWeight);
                 break;
+            case "set_goal":
+                if (userStateService.GetState(chatId) == UserState.WaitingGoalConfirmation)
+                {
+                    var macroGoal = userStateService.GetMacroGoal(chatId);
+
+                    if (macroGoal != null)
+                    {
+                        await databaseService.LogGoal(chatId, macroGoal);
+
+                        await bot.SendMessage(
+                            chatId,
+                            text: "Macro goal added!",
+                            cancellationToken: ct
+                        );
+                    }
+                    else
+                    {
+                        await bot.SendMessage(
+                            chatId,
+                            text: "Error occured!",
+                            cancellationToken: ct
+                        );
+                    }
+                }
+                break;
             default:
                 if (data!.StartsWith("goal_gender_"))
                 {
@@ -354,9 +379,13 @@ public partial class UpdateHandler(
 
                     await bot.SendMessage(
                         chatId,
-                        text: $"{macroGoal.Calories}, {macroGoal.Protein}, {macroGoal.Fat}, {macroGoal.Carbs}",
-                        cancellationToken: ct
+                        text: $"🎯 Your daily goal\n\n🔥 Calories: {macroGoal.Calories} kcal\n🥩 Protein: {macroGoal.Protein}g\n🧈 Fat: {macroGoal.Fat}g\n🍞 Carbs: {macroGoal.Carbs}g",
+                        cancellationToken: ct,
+                        replyMarkup: BotKeyboards.GoalConfirmMenu()
                     );
+
+                    userStateService.SetMacroGoal(chatId, macroGoal);
+                    userStateService.SetState(chatId, UserState.WaitingGoalConfirmation);
                 }
 
                 if (data!.StartsWith("history_"))

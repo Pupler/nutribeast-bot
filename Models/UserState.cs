@@ -8,4 +8,5 @@ public enum UserState
     WaitingGoalWeight,
     WaitingGoalHeight,
     WaitingGoalAge,
+    WaitingGoalConfirmation
 }

@@ -59,4 +59,15 @@ public class BotKeyboards()
             [ bulk_btn, cut_btn, maintain_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup GoalConfirmMenu()
+    {
+        var set_goal_btn = InlineKeyboardButton.WithCallbackData("✅ Set goal", "set_goal");
+        var cancel_goal_btn = InlineKeyboardButton.WithCallbackData("❌ Cancel", "cancel_goal");
+
+        return new InlineKeyboardMarkup([
+            [ set_goal_btn ],
+            [ cancel_goal_btn ]
+        ]);
+    }
 }
