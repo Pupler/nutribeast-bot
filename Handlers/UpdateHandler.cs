@@ -351,6 +351,21 @@ public partial class UpdateHandler(
                     }
                 }
                 break;
+            case "cancel_goal":
+                await bot.DeleteMessage(
+                    chatId,
+                    update.CallbackQuery.Message!.MessageId,
+                    cancellationToken: ct
+                );
+
+                await bot.SendMessage(
+                    chatId,
+                    text: "Canceled!",
+                    cancellationToken: ct
+                );
+
+                userStateService.SetState(chatId, UserState.Idle);
+                break;
             default:
                 if (data!.StartsWith("goal_gender_"))
                 {
