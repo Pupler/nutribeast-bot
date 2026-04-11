@@ -22,213 +22,318 @@ public partial class UpdateHandler
 
         var data = update.CallbackQuery.Data;
         var chatId = update.CallbackQuery.Message!.Chat.Id;
+        var messageId = update.CallbackQuery.Message!.MessageId;
 
         switch(data)
         {
             case "add_food":
-                await bot.SendMessage(
-                    chatId,
-                    text: "Write your food name and grams:",
-                    cancellationToken: ct
-                );
-                
-                userStateService.SetState(chatId, UserState.WaitingFoodName);
-                logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
+                await HandleAddFood(bot, chatId, ct);
                 break;
             case "check_today": 
-                var todayLog = await databaseService.GetTodayLogsAsync(chatId);
-
-                var totalKcal = todayLog.Sum(l => l.Calories).Round();
-                var totalProtein = todayLog.Sum(l => l.Protein).Round();
-                var totalFat = todayLog.Sum(l => l.Fat).Round();
-                var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
-                var totalSugar = todayLog.Sum(l => l.Sugar).Round();
-
-                await bot.SendMessage(
-                    chatId,
-                    text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g (sugar: {totalSugar}g)",
-                    cancellationToken: ct
-                );
+                await HandleCheckToday(bot, chatId, ct);
                 break;
             case "check_history": 
-                var days = await databaseService.GetDaysWithLogsAsync(chatId);
-                
-                if (!days.Any())
-                {
-                    await bot.SendMessage(
-                        chatId,
-                        text: "No history yet 📭",
-                        cancellationToken: ct
-                    );
-
-                    return;
-                }
-
-                await bot.SendMessage(
-                    chatId,
-                    text: $"📅 Select a day:",
-                    cancellationToken: ct,
-                    replyMarkup: BotKeyboards.HistoryMenu(days)
-                );
+                await HandleCheckHistory(bot, chatId, ct);
                 break;
             case "food_confirm_add":
-                if (userStateService.GetState(chatId) == UserState.WaitingConfirmation)
-                {
-                    var foodLog = userStateService.GetPendingLog(chatId);
-
-                    if ( foodLog != null)
-                    {
-                        await databaseService.LogFoodAsync(foodLog);
-
-                        await bot.DeleteMessage(
-                            chatId,
-                            update.CallbackQuery.Message!.MessageId,
-                            cancellationToken: ct
-                        );
-
-                        await bot.SendMessage(
-                            chatId,
-                            text: "Added!",
-                            cancellationToken: ct
-                        );
-
-                        userStateService.SetState(chatId, UserState.Idle);
-                    }
-                }
-
+                await HandleFoodConfirm(bot, chatId, messageId, ct);
                 break;
             case "food_cancel":
-                await bot.DeleteMessage(
-                    chatId,
-                    update.CallbackQuery.Message!.MessageId,
-                    cancellationToken: ct
-                );
-
-                await bot.SendMessage(
-                    chatId,
-                    text: "Canceled!",
-                    cancellationToken: ct
-                );
-
-                userStateService.SetState(chatId, UserState.Idle);
+                await HandleFoodCancel(bot, chatId, messageId, ct);
                 break;
             case "manage_goal":
-                await bot.SendMessage(
-                    chatId,
-                    text: "Enter your body weight:",
-                    cancellationToken: ct
-                );
-
-                userStateService.SetState(chatId, UserState.WaitingGoalWeight);
+                await HandleManageGoal(bot, chatId, ct);
                 break;
             case "set_goal":
-                if (userStateService.GetState(chatId) == UserState.WaitingGoalConfirmation)
-                {
-                    var macroGoal = userStateService.GetMacroGoal(chatId);
-
-                    if (macroGoal != null)
-                    {
-                        await databaseService.LogGoal(chatId, macroGoal);
-
-                        await bot.SendMessage(
-                            chatId,
-                            text: "Macro goal added!",
-                            cancellationToken: ct
-                        );
-                    }
-                    else
-                    {
-                        await bot.SendMessage(
-                            chatId,
-                            text: "Error occured!",
-                            cancellationToken: ct
-                        );
-                    }
-
-                    userStateService.SetState(chatId, UserState.Idle);
-                }
+                await HandleSetGoal(bot, chatId, ct);
                 break;
             case "cancel_goal":
-                await bot.DeleteMessage(
-                    chatId,
-                    update.CallbackQuery.Message!.MessageId,
-                    cancellationToken: ct
-                );
-
-                await bot.SendMessage(
-                    chatId,
-                    text: "Canceled!",
-                    cancellationToken: ct
-                );
-
-                userStateService.SetState(chatId, UserState.Idle);
+                await HandleCancelGoal(bot, chatId, messageId, ct);
                 break;
             default:
                 if (data!.StartsWith("goal_gender_"))
                 {
-                    string gender = data.Replace("goal_gender_", "");
-                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
-
-                    setup.Gender = gender;
-                    userStateService.SetGoalSetup(chatId, setup);
-                    await bot.SendMessage(
-                        chatId,
-                        text: "Choose your goal:",
-                        cancellationToken: ct,
-                        replyMarkup: BotKeyboards.GoalMenu()
-                    );
+                    await HandleGenderSelected(bot, chatId, data, ct);
                 }
 
-                if (data!.StartsWith("aim_"))
+                else if (data!.StartsWith("aim_"))
                 {
-                    string goal = data.Replace("aim_", "");
-                    var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
-
-                    setup.Goal = goal;
-                    userStateService.SetGoalSetup(chatId, setup);
-
-                    var macroGoal = TdeeCalculatorService.CalculateMacros(setup);
-
-                    await bot.SendMessage(
-                        chatId,
-                        text: $"🎯 Your daily goal\n\n🔥 Calories: {macroGoal.Calories} kcal\n🥩 Protein: {macroGoal.Protein}g\n🧈 Fat: {macroGoal.Fat}g\n🍞 Carbs: {macroGoal.Carbs}g",
-                        cancellationToken: ct,
-                        replyMarkup: BotKeyboards.GoalConfirmMenu()
-                    );
-
-                    userStateService.SetMacroGoal(chatId, macroGoal);
-                    userStateService.SetState(chatId, UserState.WaitingGoalConfirmation);
+                    await HandleAimSelected(bot, chatId, data, ct);
                 }
 
-                if (data!.StartsWith("history_"))
+                else if (data!.StartsWith("history_"))
                 {
-                    var date = data.Replace("history_", "");
-                    var dayLogs = await databaseService.GetLogsByDateAsync(chatId, date);
-
-                    if (!dayLogs.Any())
-                    {
-                        await bot.SendMessage(
-                            chatId,
-                            text: "No logs for this day 📭",
-                            cancellationToken: ct
-                        );
-
-                        return;
-                    }
-
-                    var totalDayKcal = dayLogs.Sum(l => l.Calories).Round();
-                    var totalDayProtein = dayLogs.Sum(l => l.Protein).Round();
-                    var totalDayFat = dayLogs.Sum(l => l.Fat).Round();
-                    var totalDayCarbs = dayLogs.Sum(l => l.Carbs).Round();
-                    var totalDaySugar = dayLogs.Sum(l => l.Sugar).Round();
-
-                    await bot.SendMessage(
-                        chatId,
-                        text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g (sugar: {totalDaySugar}g)",
-                        cancellationToken: ct
-                    );
+                    await HandleHistoryDate(bot, chatId, data, ct);
                 }
                 break;
         }
+    }
+
+    private async Task HandleAddFood(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        await bot.SendMessage(
+            chatId,
+            text: "Write your food name and grams:",
+            cancellationToken: ct
+        );
+        
+        userStateService.SetState(chatId, UserState.WaitingFoodName);
+        logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
+    }
+
+    private async Task HandleCheckToday(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        var todayLog = await databaseService.GetTodayLogsAsync(chatId);
+
+        var totalKcal = todayLog.Sum(l => l.Calories).Round();
+        var totalProtein = todayLog.Sum(l => l.Protein).Round();
+        var totalFat = todayLog.Sum(l => l.Fat).Round();
+        var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
+        var totalSugar = todayLog.Sum(l => l.Sugar).Round();
+
+        await bot.SendMessage(
+            chatId,
+            text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g (sugar: {totalSugar}g)",
+            cancellationToken: ct
+        );
+    }
+
+    private async Task HandleCheckHistory(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        var days = await databaseService.GetDaysWithLogsAsync(chatId);
+        
+        if (!days.Any())
+        {
+            await bot.SendMessage(
+                chatId,
+                text: "No history yet 📭",
+                cancellationToken: ct
+            );
+
+            return;
+        }
+
+        await bot.SendMessage(
+            chatId,
+            text: $"📅 Select a day:",
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.HistoryMenu(days)
+        );
+    }
+
+    private async Task HandleFoodConfirm(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        if (userStateService.GetState(chatId) == UserState.WaitingConfirmation)
+        {
+            var foodLog = userStateService.GetPendingLog(chatId);
+
+            if ( foodLog != null)
+            {
+                await databaseService.LogFoodAsync(foodLog);
+
+                await bot.DeleteMessage(
+                    chatId,
+                    messageId,
+                    cancellationToken: ct
+                );
+
+                await bot.SendMessage(
+                    chatId,
+                    text: "Added!",
+                    cancellationToken: ct
+                );
+
+                userStateService.SetState(chatId, UserState.Idle);
+            }
+        }
+    }
+
+    private async Task HandleFoodCancel(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "Canceled!",
+            cancellationToken: ct
+        );
+
+        userStateService.SetState(chatId, UserState.Idle);
+    }
+
+    private async Task HandleManageGoal(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        await bot.SendMessage(
+            chatId,
+            text: "Enter your body weight:",
+            cancellationToken: ct
+        );
+
+        userStateService.SetState(chatId, UserState.WaitingGoalWeight);
+    }
+
+    private async Task HandleSetGoal(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        if (userStateService.GetState(chatId) == UserState.WaitingGoalConfirmation)
+        {
+            var macroGoal = userStateService.GetMacroGoal(chatId);
+
+            if (macroGoal != null)
+            {
+                await databaseService.LogGoal(chatId, macroGoal);
+
+                await bot.SendMessage(
+                    chatId,
+                    text: "Macro goal added!",
+                    cancellationToken: ct
+                );
+            }
+            else
+            {
+                await bot.SendMessage(
+                    chatId,
+                    text: "Error occurred!",
+                    cancellationToken: ct
+                );
+            }
+
+            userStateService.SetState(chatId, UserState.Idle);
+        }
+    }
+
+    private async Task HandleCancelGoal(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "Canceled!",
+            cancellationToken: ct
+        );
+
+        userStateService.SetState(chatId, UserState.Idle);
+    }
+
+    private async Task HandleGenderSelected(
+        ITelegramBotClient bot,
+        long chatId,
+        string data,
+        CancellationToken ct
+    )
+    {
+        string gender = data.Replace("goal_gender_", "");
+        var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+        setup.Gender = gender;
+        userStateService.SetGoalSetup(chatId, setup);
+        await bot.SendMessage(
+            chatId,
+            text: "Choose your goal:",
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.GoalMenu()
+        );
+    }
+
+    private async Task HandleAimSelected(
+        ITelegramBotClient bot,
+        long chatId,
+        string data,
+        CancellationToken ct
+    )
+    {
+        string goal = data.Replace("aim_", "");
+        var setup = userStateService.GetGoalSetup(chatId) ?? new GoalSetup();
+
+        setup.Goal = goal;
+        userStateService.SetGoalSetup(chatId, setup);
+
+        var macroGoal = TdeeCalculatorService.CalculateMacros(setup);
+
+        await bot.SendMessage(
+            chatId,
+            text: $"🎯 Your daily goal\n\n🔥 Calories: {macroGoal.Calories} kcal\n🥩 Protein: {macroGoal.Protein}g\n🧈 Fat: {macroGoal.Fat}g\n🍞 Carbs: {macroGoal.Carbs}g",
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.GoalConfirmMenu()
+        );
+
+        userStateService.SetMacroGoal(chatId, macroGoal);
+        userStateService.SetState(chatId, UserState.WaitingGoalConfirmation);
+    }
+
+    private async Task HandleHistoryDate(
+        ITelegramBotClient bot,
+        long chatId,
+        string data,
+        CancellationToken ct
+    )
+    {
+        var date = data.Replace("history_", "");
+        var dayLogs = await databaseService.GetLogsByDateAsync(chatId, date);
+
+        if (!dayLogs.Any())
+        {
+            await bot.SendMessage(
+                chatId,
+                text: "No logs for this day 📭",
+                cancellationToken: ct
+            );
+
+            return;
+        }
+
+        var totalDayKcal = dayLogs.Sum(l => l.Calories).Round();
+        var totalDayProtein = dayLogs.Sum(l => l.Protein).Round();
+        var totalDayFat = dayLogs.Sum(l => l.Fat).Round();
+        var totalDayCarbs = dayLogs.Sum(l => l.Carbs).Round();
+        var totalDaySugar = dayLogs.Sum(l => l.Sugar).Round();
+
+        await bot.SendMessage(
+            chatId,
+            text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g (sugar: {totalDaySugar}g)",
+            cancellationToken: ct
+        );
     }
 }
