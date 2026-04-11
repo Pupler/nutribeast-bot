@@ -3,7 +3,6 @@ using NutriBeastBot.Keyboards;
 using NutriBeastBot.Models;
 using NutriBeastBot.Services;
 using Telegram.Bot;
-using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -42,10 +41,10 @@ public partial class UpdateHandler
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;
             case "check_today": 
-                await HandleCheckToday(bot, chatId, ct);
+                await HandleCheckToday(bot, chatId, messageId, ct);
                 break;
             case "check_history": 
-                await HandleCheckHistory(bot, chatId, ct);
+                await HandleCheckHistory(bot, chatId, messageId, ct);
                 break;
             case "food_confirm_add":
                 await HandleFoodConfirm(bot, chatId, messageId, ct);
@@ -75,7 +74,7 @@ public partial class UpdateHandler
 
                 else if (data!.StartsWith("history_"))
                 {
-                    await HandleHistoryDate(bot, chatId, data, ct);
+                    await HandleHistoryDate(bot, chatId, data, messageId, ct);
                 }
                 break;
         }
@@ -109,6 +108,7 @@ public partial class UpdateHandler
     private async Task HandleCheckToday(
         ITelegramBotClient bot,
         long chatId,
+        int messageId,
         CancellationToken ct
     )
     {
@@ -120,16 +120,24 @@ public partial class UpdateHandler
         var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
         var totalSugar = todayLog.Sum(l => l.Sugar).Round();
 
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
         await bot.SendMessage(
             chatId,
             text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g (sugar: {totalSugar}g)",
-            cancellationToken: ct
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.BackToMainMenu()
         );
     }
 
     private async Task HandleCheckHistory(
         ITelegramBotClient bot,
         long chatId,
+        int messageId,
         CancellationToken ct
     )
     {
@@ -140,11 +148,18 @@ public partial class UpdateHandler
             await bot.SendMessage(
                 chatId,
                 text: "No history yet 📭",
-                cancellationToken: ct
+                cancellationToken: ct,
+                replyMarkup: BotKeyboards.BackToMainMenu()
             );
 
             return;
         }
+
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
 
         await bot.SendMessage(
             chatId,
@@ -177,8 +192,9 @@ public partial class UpdateHandler
 
                 await bot.SendMessage(
                     chatId,
-                    text: "Added!",
-                    cancellationToken: ct
+                    text: "✅ Added!",
+                    cancellationToken: ct,
+                    replyMarkup: BotKeyboards.BackToMainMenu()
                 );
 
                 userStateService.SetState(chatId, UserState.Idle);
@@ -328,6 +344,7 @@ public partial class UpdateHandler
         ITelegramBotClient bot,
         long chatId,
         string data,
+        int messageId,
         CancellationToken ct
     )
     {
@@ -339,7 +356,8 @@ public partial class UpdateHandler
             await bot.SendMessage(
                 chatId,
                 text: "No logs for this day 📭",
-                cancellationToken: ct
+                cancellationToken: ct,
+                replyMarkup: BotKeyboards.BackToMainMenu()
             );
 
             return;
@@ -351,10 +369,17 @@ public partial class UpdateHandler
         var totalDayCarbs = dayLogs.Sum(l => l.Carbs).Round();
         var totalDaySugar = dayLogs.Sum(l => l.Sugar).Round();
 
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
         await bot.SendMessage(
             chatId,
             text: $"📅 {date}\n\n🔥 Calories: {totalDayKcal} kcal\n🥩 Protein: {totalDayProtein}g\n🧈 Fat: {totalDayFat}g\n🍞 Carbs: {totalDayCarbs}g (sugar: {totalDaySugar}g)",
-            cancellationToken: ct
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.BackToMainMenu()
         );
     }
 }

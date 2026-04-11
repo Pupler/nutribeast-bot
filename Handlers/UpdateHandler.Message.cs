@@ -65,6 +65,7 @@ public partial class UpdateHandler
                     chatId,
                     text: BotTexts.StartMessage,
                     cancellationToken: ct,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: BotKeyboards.MainMenu()
                 );
                 break;
