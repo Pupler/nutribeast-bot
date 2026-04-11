@@ -3,7 +3,9 @@ using NutriBeastBot.Keyboards;
 using NutriBeastBot.Models;
 using NutriBeastBot.Services;
 using Telegram.Bot;
+using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace NutriBeastBot.Handlers;
 
@@ -26,8 +28,18 @@ public partial class UpdateHandler
 
         switch(data)
         {
+            case "main_menu":
+                userStateService.SetState(chatId, UserState.Idle);
+                await bot.DeleteMessage(
+                    chatId,
+                    messageId,
+                    cancellationToken: ct
+                );
+
+                await HandleIdle(bot, chatId, command: "/start", ct);
+                break;
             case "add_food":
-                await HandleAddFood(bot, chatId, ct);
+                await HandleAddFood(bot, chatId, messageId, ct);
                 break;
             case "check_today": 
                 await HandleCheckToday(bot, chatId, ct);
@@ -72,13 +84,22 @@ public partial class UpdateHandler
     private async Task HandleAddFood(
         ITelegramBotClient bot,
         long chatId,
+        int messageId,
         CancellationToken ct
     )
     {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
         await bot.SendMessage(
             chatId,
-            text: "Write your food name and grams:",
-            cancellationToken: ct
+            text: "*Write your food name and grams:*\n(Format - `chicken breast 200g`)",
+            parseMode: ParseMode.Markdown,
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.BackToMainMenu()
         );
         
         userStateService.SetState(chatId, UserState.WaitingFoodName);

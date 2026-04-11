@@ -70,4 +70,13 @@ public class BotKeyboards()
             [ cancel_goal_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup BackToMainMenu()
+    {
+        var main_menu_btn = InlineKeyboardButton.WithCallbackData("🔙 Main menu", "main_menu");
+
+        return new InlineKeyboardMarkup([
+            [ main_menu_btn ]
+        ]);
+    }
 }
