@@ -124,8 +124,9 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: $"🍗 {name} ({grams}g)\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g (sugar: {sugar}g)",
+            text: $"*🍗 {name} ({grams}g)*\n\n🔥 Calories: {kcal} kcal\n🥩 Protein: {protein}g\n🧈 Fat: {fat}g\n🍞 Carbs: {carbs}g (sugar: {sugar}g)",
             cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.FoodConfirmMenu()
         );
 

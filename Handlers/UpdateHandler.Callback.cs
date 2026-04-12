@@ -40,6 +40,9 @@ public partial class UpdateHandler
             case "add_food":
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;
+            case "food_edit":
+                await HandleFoodEdit(bot, chatId, messageId, ct);
+                break;
             case "check_today": 
                 await HandleCheckToday(bot, chatId, messageId, ct);
                 break;
@@ -130,8 +133,9 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} / {getGoal?.Calories} kcal\n🥩 Protein: {totalProtein} / {getGoal?.Protein}g\n🧈 Fat: {totalFat} / {getGoal?.Fat}g\n🍞 Carbs: {totalCarbs} (sugar: {totalSugar}g) / {getGoal?.Carbs}g",
+            text: $"*📊 Today's summary*\n\n🔥 Calories: {totalKcal} / {getGoal?.Calories} kcal\n🥩 Protein: {totalProtein} / {getGoal?.Protein}g\n🧈 Fat: {totalFat} / {getGoal?.Fat}g\n🍞 Carbs: {totalCarbs} (sugar: {totalSugar}g) / {getGoal?.Carbs}g",
             cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.BackToMainMenu()
         );
     }
@@ -194,8 +198,9 @@ public partial class UpdateHandler
 
                 await bot.SendMessage(
                     chatId,
-                    text: "✅ Added!",
+                    text: "*✅ Added!*",
                     cancellationToken: ct,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: BotKeyboards.BackToMainMenu()
                 );
 
@@ -224,6 +229,28 @@ public partial class UpdateHandler
         );
 
         userStateService.SetState(chatId, UserState.Idle);
+    }
+
+    private async Task HandleFoodEdit(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "*What would you like to edit?*",
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.FoodEditMenu(),
+            cancellationToken: ct
+        );
     }
 
     private async Task HandleManageGoal(

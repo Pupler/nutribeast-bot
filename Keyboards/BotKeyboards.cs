@@ -79,4 +79,17 @@ public class BotKeyboards()
             [ main_menu_btn ]
         ]);
     }
+
+    public static InlineKeyboardMarkup FoodEditMenu()
+    {
+        var edit_kcal_btn = InlineKeyboardButton.WithCallbackData("🔥 Calories", "edit_kcal");
+        var edit_protein_btn = InlineKeyboardButton.WithCallbackData("🥩 Protein", "edit_protein");
+        var edit_fat_btn = InlineKeyboardButton.WithCallbackData("🧈 Fat", "edit_fat");
+        var edit_carbs_btn = InlineKeyboardButton.WithCallbackData("🍞 Carbs", "edit_carbs");
+
+        return new InlineKeyboardMarkup([
+            [ edit_kcal_btn, edit_protein_btn ],
+            [ edit_fat_btn, edit_carbs_btn ]
+        ]);
+    }
 }
