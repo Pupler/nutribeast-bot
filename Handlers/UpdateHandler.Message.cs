@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using NutriBeastBot.Constants;
 using NutriBeastBot.Extensions;
 using NutriBeastBot.Keyboards;

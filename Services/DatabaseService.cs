@@ -95,4 +95,14 @@ public class DatabaseService(IConfiguration configuration)
             macroGoal.Carbs
         });
     }
+
+    public async Task<MacroGoal?> GetGoal(long chatId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        return await connection.QueryFirstOrDefaultAsync<MacroGoal>(@"
+            SELECT * FROM user_goals
+            WHERE chat_id = @ChatId
+        ", new { ChatId = chatId });
+    } 
 }

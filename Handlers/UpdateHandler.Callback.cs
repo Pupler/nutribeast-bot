@@ -120,6 +120,8 @@ public partial class UpdateHandler
         var totalCarbs = todayLog.Sum(l => l.Carbs).Round();
         var totalSugar = todayLog.Sum(l => l.Sugar).Round();
 
+        var getGoal = await databaseService.GetGoal(chatId);
+
         await bot.DeleteMessage(
             chatId,
             messageId,
@@ -128,7 +130,7 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} kcal\n🥩 Protein: {totalProtein}g\n🧈 Fat: {totalFat}g\n🍞 Carbs: {totalCarbs}g (sugar: {totalSugar}g)",
+            text: $"📊 Today's summary\n\n🔥 Calories: {totalKcal} / {getGoal?.Calories} kcal\n🥩 Protein: {totalProtein} / {getGoal?.Protein}g\n🧈 Fat: {totalFat} / {getGoal?.Fat}g\n🍞 Carbs: {totalCarbs} (sugar: {totalSugar}g) / {getGoal?.Carbs}g",
             cancellationToken: ct,
             replyMarkup: BotKeyboards.BackToMainMenu()
         );
@@ -142,6 +144,12 @@ public partial class UpdateHandler
     )
     {
         var days = await databaseService.GetDaysWithLogsAsync(chatId);
+
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
         
         if (!days.Any())
         {
@@ -154,12 +162,6 @@ public partial class UpdateHandler
 
             return;
         }
-
-        await bot.DeleteMessage(
-            chatId,
-            messageId,
-            cancellationToken: ct
-        );
 
         await bot.SendMessage(
             chatId,
@@ -232,7 +234,7 @@ public partial class UpdateHandler
     {
         await bot.SendMessage(
             chatId,
-            text: "Enter your body weight:",
+            text: "Enter your body weight (kg):",
             cancellationToken: ct
         );
 
