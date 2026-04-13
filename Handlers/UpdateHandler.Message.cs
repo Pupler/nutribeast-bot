@@ -45,6 +45,9 @@ public partial class UpdateHandler
             case UserState.WaitingGoalAge:
                 await HandleWaitingGoalAge(bot, chatId, text, ct);
                 break;
+            case UserState.WaitingKcalEdit:
+                await HandleWaitingKcalEdit(bot, chatId, text, ct);
+                break;
             default:
                 break;
         }
@@ -143,6 +146,40 @@ public partial class UpdateHandler
         });
 
         userStateService.SetState(chatId, UserState.WaitingConfirmation);
+    }
+
+    private async Task HandleWaitingKcalEdit(
+        ITelegramBotClient bot,
+        long chatId,
+        string text,
+        CancellationToken ct
+    )
+    {
+        if (double.TryParse(text, out double newKcalValue))
+        {
+            var pendingLog = userStateService.GetPendingLog(chatId);
+
+            if (pendingLog != null)
+            {
+                pendingLog.Calories = newKcalValue;
+
+                await bot.SendMessage(
+                    chatId,
+                    text: "Kcal changed!",
+                    cancellationToken: ct
+                );
+
+                await bot.SendMessage(
+                    chatId,
+                    text: $"*🍗 {pendingLog.Name} ({pendingLog.Grams}g)*\n\n🔥 Calories: {pendingLog.Calories} kcal\n🥩 Protein: {pendingLog.Protein}g\n🧈 Fat: {pendingLog.Fat}g\n🍞 Carbs: {pendingLog.Carbs}g (sugar: {pendingLog.Sugar}g)",
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: BotKeyboards.FoodConfirmMenu(),
+                    cancellationToken: ct
+                );
+            }
+
+            userStateService.SetState(chatId, UserState.WaitingConfirmation);
+        }
     }
 
     private async Task HandleWaitingGoalWeight(

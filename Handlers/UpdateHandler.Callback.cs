@@ -43,6 +43,9 @@ public partial class UpdateHandler
             case "food_edit":
                 await HandleFoodEdit(bot, chatId, messageId, ct);
                 break;
+            case "edit_kcal":
+                await HandleKcalEdit(bot, chatId, ct);
+                break;
             case "check_today": 
                 await HandleCheckToday(bot, chatId, messageId, ct);
                 break;
@@ -231,7 +234,7 @@ public partial class UpdateHandler
         userStateService.SetState(chatId, UserState.Idle);
     }
 
-    private async Task HandleFoodEdit(
+    private static async Task HandleFoodEdit(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
@@ -251,6 +254,23 @@ public partial class UpdateHandler
             replyMarkup: BotKeyboards.FoodEditMenu(),
             cancellationToken: ct
         );
+    }
+
+    private async Task HandleKcalEdit(
+        ITelegramBotClient bot,
+        long chatId,
+        CancellationToken ct
+    )
+    {
+        await bot.SendMessage(
+            chatId,
+            text: "*Write new calories value:*",
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.BackToMainMenu(),
+            cancellationToken: ct
+        );
+
+        userStateService.SetState(chatId, UserState.WaitingKcalEdit);
     }
 
     private async Task HandleManageGoal(

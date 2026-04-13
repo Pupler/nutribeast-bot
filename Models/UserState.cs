@@ -8,5 +8,9 @@ public enum UserState
     WaitingGoalWeight,
     WaitingGoalHeight,
     WaitingGoalAge,
-    WaitingGoalConfirmation
+    WaitingGoalConfirmation,
+    WaitingKcalEdit,
+    WaitingProteinEdit,
+    WaitingFatEdit,
+    WaitingCarbsEdit
 }
