@@ -45,8 +45,8 @@ public partial class UpdateHandler
             case UserState.WaitingGoalAge:
                 await HandleWaitingGoalAge(bot, chatId, text, ct);
                 break;
-            case UserState.WaitingKcalEdit:
-                await HandleWaitingKcalEdit(bot, chatId, text, ct);
+            case UserState.WaitingFoodMacroEdit:
+                await HandleWaitingFoodMacroEdit(bot, chatId, text, ct);
                 break;
             default:
                 break;
@@ -148,37 +148,47 @@ public partial class UpdateHandler
         userStateService.SetState(chatId, UserState.WaitingConfirmation);
     }
 
-    private async Task HandleWaitingKcalEdit(
+    private async Task HandleWaitingFoodMacroEdit(
         ITelegramBotClient bot,
         long chatId,
         string text,
         CancellationToken ct
     )
     {
-        if (double.TryParse(text, out double newKcalValue))
+        if (double.TryParse(text, out double newMacroValue))
         {
             var pendingLog = userStateService.GetPendingLog(chatId);
 
             if (pendingLog != null)
             {
-                pendingLog.Calories = newKcalValue;
+                var macroEdit = userStateService.GetMacroEdit(chatId);
 
-                await bot.SendMessage(
-                    chatId,
-                    text: "Kcal changed!",
-                    cancellationToken: ct
-                );
+                if (macroEdit != null)
+                {
+                    typeof(FoodLog).GetProperty(macroEdit)?.SetValue(pendingLog, newMacroValue);
 
-                await bot.SendMessage(
-                    chatId,
-                    text: $"*🍗 {pendingLog.Name} ({pendingLog.Grams}g)*\n\n🔥 Calories: {pendingLog.Calories} kcal\n🥩 Protein: {pendingLog.Protein}g\n🧈 Fat: {pendingLog.Fat}g\n🍞 Carbs: {pendingLog.Carbs}g (sugar: {pendingLog.Sugar}g)",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: BotKeyboards.FoodConfirmMenu(),
-                    cancellationToken: ct
-                );
+                    await bot.SendMessage(
+                        chatId,
+                        text: $"*✅ {macroEdit} changed!*",
+                        parseMode: ParseMode.Markdown,
+                        cancellationToken: ct
+                    );
+
+                    await bot.SendMessage(
+                        chatId,
+                        text: $"*🍗 {pendingLog.Name} ({pendingLog.Grams}g)*\n\n🔥 Calories: {pendingLog.Calories} kcal\n🥩 Protein: {pendingLog.Protein}g\n🧈 Fat: {pendingLog.Fat}g\n🍞 Carbs: {pendingLog.Carbs}g (sugar: {pendingLog.Sugar}g)",
+                        parseMode: ParseMode.Markdown,
+                        replyMarkup: BotKeyboards.FoodConfirmMenu(),
+                        cancellationToken: ct
+                    );
+
+                    userStateService.SetState(chatId, UserState.WaitingConfirmation);
+                }
+
+                return;
             }
 
-            userStateService.SetState(chatId, UserState.WaitingConfirmation);
+            userStateService.SetState(chatId, UserState.Idle);
         }
     }
 

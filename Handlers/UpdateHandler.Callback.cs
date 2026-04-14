@@ -43,9 +43,6 @@ public partial class UpdateHandler
             case "food_edit":
                 await HandleFoodEdit(bot, chatId, messageId, ct);
                 break;
-            case "edit_kcal":
-                await HandleKcalEdit(bot, chatId, ct);
-                break;
             case "check_today": 
                 await HandleCheckToday(bot, chatId, messageId, ct);
                 break;
@@ -81,6 +78,11 @@ public partial class UpdateHandler
                 else if (data!.StartsWith("history_"))
                 {
                     await HandleHistoryDate(bot, chatId, data, messageId, ct);
+                }
+
+                else if (data!.StartsWith("edit_"))
+                {
+                    await HandleMacroEdit(bot, chatId, data, ct);
                 }
                 break;
         }
@@ -189,7 +191,7 @@ public partial class UpdateHandler
         {
             var foodLog = userStateService.GetPendingLog(chatId);
 
-            if ( foodLog != null)
+            if (foodLog != null)
             {
                 await databaseService.LogFoodAsync(foodLog);
 
@@ -256,21 +258,25 @@ public partial class UpdateHandler
         );
     }
 
-    private async Task HandleKcalEdit(
+    private async Task HandleMacroEdit(
         ITelegramBotClient bot,
         long chatId,
+        string data,
         CancellationToken ct
     )
     {
+        var macroEdit = data.Replace("edit_", "");
+
         await bot.SendMessage(
             chatId,
-            text: "*Write new calories value:*",
+            text: $"*Write new {macroEdit} value:*",
             parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.BackToMainMenu(),
             cancellationToken: ct
         );
 
-        userStateService.SetState(chatId, UserState.WaitingKcalEdit);
+        userStateService.SetState(chatId, UserState.WaitingFoodMacroEdit);
+        userStateService.SetMacroEdit(chatId, macroEdit.FirstCharToUpper());
     }
 
     private async Task HandleManageGoal(

@@ -82,7 +82,7 @@ public class BotKeyboards()
 
     public static InlineKeyboardMarkup FoodEditMenu()
     {
-        var edit_kcal_btn = InlineKeyboardButton.WithCallbackData("🔥 Calories", "edit_kcal");
+        var edit_kcal_btn = InlineKeyboardButton.WithCallbackData("🔥 Calories", "edit_calories");
         var edit_protein_btn = InlineKeyboardButton.WithCallbackData("🥩 Protein", "edit_protein");
         var edit_fat_btn = InlineKeyboardButton.WithCallbackData("🧈 Fat", "edit_fat");
         var edit_carbs_btn = InlineKeyboardButton.WithCallbackData("🍞 Carbs", "edit_carbs");
