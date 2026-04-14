@@ -21,7 +21,7 @@ public class BotKeyboards()
     public static InlineKeyboardMarkup FoodConfirmMenu()
     {
         var add_btn = InlineKeyboardButton.WithCallbackData("✅ Add", "food_confirm_add");
-        var cancel_btn = InlineKeyboardButton.WithCallbackData("🗑 Cancel", "food_cancel");
+        var cancel_btn = InlineKeyboardButton.WithCallbackData("🗑 Cancel", "cancel");
         var edit_btn = InlineKeyboardButton.WithCallbackData("✏️ Edit", "food_edit");
 
         return new InlineKeyboardMarkup([
@@ -34,7 +34,13 @@ public class BotKeyboards()
     {
         var buttons = dates
             .Select(date => InlineKeyboardButton.WithCallbackData(date, $"history_{date}"))
-            .Chunk(3);
+            .Chunk(3)
+            .ToList();
+
+        buttons.Add(
+        [
+            InlineKeyboardButton.WithCallbackData("🔙 Main menu", "main_menu")
+        ]);
 
         return new InlineKeyboardMarkup(buttons);
     }
@@ -63,7 +69,7 @@ public class BotKeyboards()
     public static InlineKeyboardMarkup GoalConfirmMenu()
     {
         var set_goal_btn = InlineKeyboardButton.WithCallbackData("✅ Set goal", "set_goal");
-        var cancel_goal_btn = InlineKeyboardButton.WithCallbackData("❌ Cancel", "cancel_goal");
+        var cancel_goal_btn = InlineKeyboardButton.WithCallbackData("❌ Cancel", "cancel");
 
         return new InlineKeyboardMarkup([
             [ set_goal_btn ],
@@ -86,10 +92,21 @@ public class BotKeyboards()
         var edit_protein_btn = InlineKeyboardButton.WithCallbackData("🥩 Protein", "edit_protein");
         var edit_fat_btn = InlineKeyboardButton.WithCallbackData("🧈 Fat", "edit_fat");
         var edit_carbs_btn = InlineKeyboardButton.WithCallbackData("🍞 Carbs", "edit_carbs");
+        var cancel_btn = InlineKeyboardButton.WithCallbackData("❌ Cancel", "cancel");
 
         return new InlineKeyboardMarkup([
             [ edit_kcal_btn, edit_protein_btn ],
-            [ edit_fat_btn, edit_carbs_btn ]
+            [ edit_fat_btn, edit_carbs_btn ],
+            [ cancel_btn ]
+        ]);
+    }
+
+    public static InlineKeyboardMarkup CancelMenu()
+    {
+        var cancel_btn = InlineKeyboardButton.WithCallbackData("❌ Cancel", "cancel");
+
+        return new InlineKeyboardMarkup([
+            [ cancel_btn ]
         ]);
     }
 }

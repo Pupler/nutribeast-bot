@@ -52,17 +52,14 @@ public partial class UpdateHandler
             case "food_confirm_add":
                 await HandleFoodConfirm(bot, chatId, messageId, ct);
                 break;
-            case "food_cancel":
-                await HandleFoodCancel(bot, chatId, messageId, ct);
-                break;
             case "manage_goal":
                 await HandleManageGoal(bot, chatId, ct);
                 break;
             case "set_goal":
                 await HandleSetGoal(bot, chatId, ct);
                 break;
-            case "cancel_goal":
-                await HandleCancelGoal(bot, chatId, messageId, ct);
+            case "cancel":
+                await HandleCancel(bot, chatId, messageId, ct);
                 break;
             default:
                 if (data!.StartsWith("goal_gender_"))
@@ -82,7 +79,7 @@ public partial class UpdateHandler
 
                 else if (data!.StartsWith("edit_"))
                 {
-                    await HandleMacroEdit(bot, chatId, data, ct);
+                    await HandleMacroEdit(bot, chatId, data, messageId, ct);
                 }
                 break;
         }
@@ -174,8 +171,9 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: $"📅 Select a day:",
+            text: $"*📅 Select a day:*",
             cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.HistoryMenu(days)
         );
     }
@@ -203,7 +201,7 @@ public partial class UpdateHandler
 
                 await bot.SendMessage(
                     chatId,
-                    text: "*✅ Added!*",
+                    text: "✅ *Logged!*\n\n Every bite counts. Keep it up! 💪",
                     cancellationToken: ct,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: BotKeyboards.BackToMainMenu()
@@ -214,7 +212,7 @@ public partial class UpdateHandler
         }
     }
 
-    private async Task HandleFoodCancel(
+    private async Task HandleCancel(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
@@ -229,8 +227,10 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: "Canceled!",
-            cancellationToken: ct
+            text: "❌ *Cancelled!*\n\n No worries, whenever you're ready 😊",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.BackToMainMenu()
         );
 
         userStateService.SetState(chatId, UserState.Idle);
@@ -262,16 +262,23 @@ public partial class UpdateHandler
         ITelegramBotClient bot,
         long chatId,
         string data,
+        int messageId,
         CancellationToken ct
     )
     {
         var macroEdit = data.Replace("edit_", "");
 
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
         await bot.SendMessage(
             chatId,
             text: $"*Write new {macroEdit} value:*",
             parseMode: ParseMode.Markdown,
-            replyMarkup: BotKeyboards.BackToMainMenu(),
+            replyMarkup: BotKeyboards.CancelMenu(),
             cancellationToken: ct
         );
 
@@ -325,28 +332,6 @@ public partial class UpdateHandler
 
             userStateService.SetState(chatId, UserState.Idle);
         }
-    }
-
-    private async Task HandleCancelGoal(
-        ITelegramBotClient bot,
-        long chatId,
-        int messageId,
-        CancellationToken ct
-    )
-    {
-        await bot.DeleteMessage(
-            chatId,
-            messageId,
-            cancellationToken: ct
-        );
-
-        await bot.SendMessage(
-            chatId,
-            text: "Canceled!",
-            cancellationToken: ct
-        );
-
-        userStateService.SetState(chatId, UserState.Idle);
     }
 
     private async Task HandleGenderSelected(
