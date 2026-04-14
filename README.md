@@ -9,16 +9,17 @@ A Telegram bot for tracking daily calories and macros (protein, fat, carbs), bui
 ## Features
 
 - 🍗 **Add food** — search by name and grams, auto-fetch macros from Open Food Facts API
+- ✏️ **Edit macros** — adjust calories, protein, fat, carbs before saving
 - ✅ **Confirm/Cancel** — review macros before saving to database
 - 📊 **Today** — full summary of calories and macros for the day
 - 📅 **History** — browse logs by day for the past 7 days
 - 🎯 **Goal setup** — enter weight, height, age, gender and goal (bulk/cut/maintain), get personalized daily macro targets calculated via Mifflin-St Jeor formula
+- 🎯 **Goal progress** — compare today's intake with daily targets
+- 💬 **Clean message design** — structured Telegram UI with emojis and inline actions
 - 💾 **SQLite storage** — all entries saved locally with Dapper ORM
 
 ## Planned
 
-- ✏️ Edit food entries
-- 🎯 Display daily goal progress
 - 📋 Custom food presets
 
 ## Stack
