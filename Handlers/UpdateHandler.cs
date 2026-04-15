@@ -7,6 +7,7 @@ namespace NutriBeastBot.Handlers;
 
 public partial class UpdateHandler(
     ILogger<UpdateHandler> logger,
+    IConfiguration configuration,
     UserStateService userStateService,
     FoodParserService foodParserService,
     FoodApiService foodApiService,

@@ -53,7 +53,7 @@ public partial class UpdateHandler
         }
     }
 
-    private static async Task HandleIdle(
+    private async Task HandleIdle(
         ITelegramBotClient bot,
         long chatId,
         string command,
@@ -63,12 +63,13 @@ public partial class UpdateHandler
         switch(command)
         {
             case "/start":
-                await bot.SendMessage(
+                await bot.SendPhoto(
                     chatId,
-                    text: BotTexts.StartMessage,
-                    cancellationToken: ct,
+                    photo: InputFile.FromFileId(configuration["WelcomePhotoId"]!),
+                    caption: BotTexts.StartMessage,
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: BotKeyboards.MainMenu()
+                    replyMarkup: BotKeyboards.MainMenu(),
+                    cancellationToken: ct
                 );
                 break;
             default:
