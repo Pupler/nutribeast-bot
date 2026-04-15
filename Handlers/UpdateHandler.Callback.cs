@@ -40,6 +40,9 @@ public partial class UpdateHandler
             case "menu_food":
                 await HandleFoodMenu(bot, chatId, messageId, ct);
                 break;
+            case "menu_stats":
+                await HandleStatsMenu(bot, chatId, messageId, ct);
+                break;
             case "add_food":
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;
@@ -88,7 +91,7 @@ public partial class UpdateHandler
         }
     }
 
-    private async Task HandleFoodMenu(
+    private static async Task HandleFoodMenu(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
@@ -107,6 +110,28 @@ public partial class UpdateHandler
             cancellationToken: ct,
             parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.FoodMenu()
+        );
+    }
+
+    private static async Task HandleStatsMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "📊 *Stats*\n\nChoose an option 👇",
+            parseMode: ParseMode.Markdown,
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.StatsMenu()
         );
     }
 
