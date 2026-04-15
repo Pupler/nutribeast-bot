@@ -6,6 +6,10 @@ A Telegram bot for tracking daily calories and macros (protein, fat, carbs), bui
 
 👉 [@NutriBeastBot](https://t.me/NutriBeastBot)
 
+## Preview
+
+<img width="300" alt="grafik" src="https://github.com/user-attachments/assets/9e1080d8-4b04-4e93-abbe-8fefc408cc40" />
+
 ## Features
 
 - 🍗 **Add food** — search by name and grams, auto-fetch macros from Open Food Facts API
