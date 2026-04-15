@@ -37,6 +37,9 @@ public partial class UpdateHandler
 
                 await HandleIdle(bot, chatId, command: "/start", ct);
                 break;
+            case "menu_food":
+                await HandleFoodMenu(bot, chatId, messageId, ct);
+                break;
             case "add_food":
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;
@@ -85,6 +88,28 @@ public partial class UpdateHandler
         }
     }
 
+    private async Task HandleFoodMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "🍽 *Food Menu*\n\nChoose an option 👇",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.FoodMenu()
+        );
+    }
+
     private async Task HandleAddFood(
         ITelegramBotClient bot,
         long chatId,
@@ -103,11 +128,11 @@ public partial class UpdateHandler
             text: "*Write your food name and grams:*\n(Format - `chicken breast 200g`)",
             parseMode: ParseMode.Markdown,
             cancellationToken: ct,
-            replyMarkup: BotKeyboards.BackToMainMenu()
+            replyMarkup: BotKeyboards.CancelMenu()
         );
         
         userStateService.SetState(chatId, UserState.WaitingFoodName);
-        logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
+        // logger.LogInformation("User {ChatId} state: {State}", chatId, userStateService.GetState(chatId));
     }
 
     private async Task HandleCheckToday(

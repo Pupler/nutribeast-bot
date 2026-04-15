@@ -6,15 +6,25 @@ public class BotKeyboards()
 {
     public static InlineKeyboardMarkup MainMenu()
     {
-        var add_food_btn = InlineKeyboardButton.WithCallbackData("🍗 Add food", "add_food");
-        var today_btn = InlineKeyboardButton.WithCallbackData("📊 Today", "check_today");
-        var history_btn = InlineKeyboardButton.WithCallbackData("📅 History", "check_history");
-        var goal_btn = InlineKeyboardButton.WithCallbackData("🎯 Goal", "manage_goal");
+        var menu_food_btn = InlineKeyboardButton.WithCallbackData("🍽 Food", "menu_food");
+        var menu_stats_btn = InlineKeyboardButton.WithCallbackData("📊 Stats", "menu_stats");
+        var manage_goal_btn = InlineKeyboardButton.WithCallbackData("🎯 Goal", "manage_goal");
+        var menu_settings_btn = InlineKeyboardButton.WithCallbackData("⚙️ Settings", "menu_settings");
         
         return new InlineKeyboardMarkup([
+            [ menu_food_btn, menu_stats_btn ],
+            [ manage_goal_btn, menu_settings_btn ]
+        ]);
+    }
+
+    public static InlineKeyboardMarkup FoodMenu()
+    {
+        var add_food_btn = InlineKeyboardButton.WithCallbackData("🍗 Add food", "add_food");
+        var back_btn = InlineKeyboardButton.WithCallbackData("⬅️ Back", "main_menu");
+
+        return new InlineKeyboardMarkup([
             [ add_food_btn ],
-            [ today_btn, history_btn ],
-            [ goal_btn ]
+            [ back_btn ]
         ]);
     }
 
