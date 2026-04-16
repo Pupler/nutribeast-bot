@@ -46,6 +46,9 @@ public partial class UpdateHandler
             case "goal_menu":
                 await HandleGoalMenu(bot, chatId, messageId, ct);
                 break;
+            case "goal_view":
+                await HandleGoalView(bot, chatId, messageId, ct);
+                break;
             case "add_food":
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;
@@ -62,7 +65,7 @@ public partial class UpdateHandler
                 await HandleFoodConfirm(bot, chatId, messageId, ct);
                 break;
             case "manage_goal":
-                await HandleManageGoal(bot, chatId, messageId, ct);
+                await HandleUpdateGoal(bot, chatId, messageId, ct);
                 break;
             case "set_goal":
                 await HandleSetGoal(bot, chatId, messageId, ct);

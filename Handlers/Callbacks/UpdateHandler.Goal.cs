@@ -25,8 +25,52 @@ public partial class UpdateHandler
             cancellationToken: ct
         );
     }
+
+    private async Task HandleGoalView(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        var goal = await databaseService.GetGoal(chatId);
+
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        if (goal == null)
+        {
+            await bot.SendMessage(
+                chatId,
+                text: "No goal set yet 📭",
+                cancellationToken: ct,
+                replyMarkup: BotKeyboards.BackToMainMenu()
+            );
+
+            return;
+        }
+
+        await bot.SendMessage(
+            chatId,
+            text: $"""
+                🎯 *Your Daily Goal*
+
+                🔥 *Calories:* {goal.Calories} kcal
+
+                🥩 *Protein:* {goal.Protein} g  
+                🧈 *Fat:* {goal.Fat} g  
+                🍞 *Carbs:* {goal.Carbs} g
+                """,
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.BackToMainMenu()
+        );
+    }
     
-    private async Task HandleManageGoal(
+    private async Task HandleUpdateGoal(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
