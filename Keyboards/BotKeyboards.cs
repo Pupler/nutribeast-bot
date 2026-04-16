@@ -8,7 +8,7 @@ public class BotKeyboards()
     {
         var menu_food_btn = InlineKeyboardButton.WithCallbackData("🍽 Food", "menu_food");
         var menu_stats_btn = InlineKeyboardButton.WithCallbackData("📊 Stats", "menu_stats");
-        var manage_goal_btn = InlineKeyboardButton.WithCallbackData("🎯 Goal", "manage_goal");
+        var manage_goal_btn = InlineKeyboardButton.WithCallbackData("🎯 Goal", "goal_menu");
         var menu_settings_btn = InlineKeyboardButton.WithCallbackData("⚙️ Settings", "menu_settings");
         
         return new InlineKeyboardMarkup([
@@ -20,7 +20,7 @@ public class BotKeyboards()
     public static InlineKeyboardMarkup FoodMenu()
     {
         var add_food_btn = InlineKeyboardButton.WithCallbackData("🍗 Add food", "add_food");
-        var back_btn = InlineKeyboardButton.WithCallbackData("⬅️ Back", "main_menu");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "main_menu");
 
         return new InlineKeyboardMarkup([
             [ add_food_btn ],
@@ -32,10 +32,24 @@ public class BotKeyboards()
     {
         var today_btn = InlineKeyboardButton.WithCallbackData("📊 Today", "check_today");
         var history_btn = InlineKeyboardButton.WithCallbackData("📅 History", "check_history");
-        var back_btn = InlineKeyboardButton.WithCallbackData("⬅️ Back", "main_menu");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "main_menu");
 
         return new InlineKeyboardMarkup([
             [ today_btn, history_btn ],
+            [ back_btn ]
+        ]);
+    }
+
+    public static InlineKeyboardMarkup GoalManageMenu()
+    {
+        var view_btn = InlineKeyboardButton.WithCallbackData("👁 View goal", "goal_view");
+        var set_btn = InlineKeyboardButton.WithCallbackData("✏️ Set / Update", "manage_goal");
+        var delete_btn = InlineKeyboardButton.WithCallbackData("🗑 Delete", "goal_delete");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "main_menu");
+
+        return new InlineKeyboardMarkup([
+            [ view_btn ],
+            [ set_btn, delete_btn ],
             [ back_btn ]
         ]);
     }

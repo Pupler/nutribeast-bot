@@ -2,21 +2,48 @@ using NutriBeastBot.Keyboards;
 using NutriBeastBot.Models;
 using NutriBeastBot.Services;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace NutriBeastBot.Handlers;
 
 public partial class UpdateHandler
 {
-    private async Task HandleManageGoal(
+    private static async Task HandleGoalMenu(
         ITelegramBotClient bot,
         long chatId,
+        int messageId,
         CancellationToken ct
     )
     {
+        await bot.DeleteMessage(chatId, messageId, cancellationToken: ct);
+
         await bot.SendMessage(
             chatId,
-            text: "Enter your body weight (kg):",
+            text: "*🎯 Goal settings*",
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.GoalManageMenu(),
             cancellationToken: ct
+        );
+    }
+    
+    private async Task HandleManageGoal(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "✏️ *Enter your body weight (kg):*",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown
         );
 
         userStateService.SetState(chatId, UserState.WaitingGoalWeight);
@@ -25,6 +52,7 @@ public partial class UpdateHandler
     private async Task HandleSetGoal(
         ITelegramBotClient bot,
         long chatId,
+        int messageId,
         CancellationToken ct
     )
     {
@@ -36,10 +64,18 @@ public partial class UpdateHandler
             {
                 await databaseService.LogGoal(chatId, macroGoal);
 
+                await bot.DeleteMessage(
+                    chatId,
+                    messageId,
+                    cancellationToken: ct
+                );
+
                 await bot.SendMessage(
                     chatId,
-                    text: "Macro goal added!",
-                    cancellationToken: ct
+                    text: "🎯 *Macro goal added!*",
+                    cancellationToken: ct,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: BotKeyboards.BackToMainMenu()
                 );
             }
             else
