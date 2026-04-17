@@ -87,7 +87,8 @@ public partial class UpdateHandler
             chatId,
             text: "✏️ *Enter your body weight (kg):*",
             cancellationToken: ct,
-            parseMode: ParseMode.Markdown
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.CancelMenu()
         );
 
         userStateService.SetState(chatId, UserState.WaitingGoalWeight);
@@ -116,7 +117,7 @@ public partial class UpdateHandler
 
                 await bot.SendMessage(
                     chatId,
-                    text: "🎯 *Macro goal added!*",
+                    text: "🎯 *Macro goal set!*",
                     cancellationToken: ct,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: BotKeyboards.BackToMainMenu()
@@ -149,8 +150,9 @@ public partial class UpdateHandler
         userStateService.SetGoalSetup(chatId, setup);
         await bot.SendMessage(
             chatId,
-            text: "Choose your goal:",
+            text: "👇 *Choose your goal:*",
             cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.GoalMenu()
         );
     }

@@ -90,7 +90,7 @@ public partial class UpdateHandler
         {
             await bot.SendMessage(
                 chatId,
-                text: "Invalid format!\nUse: `chicken breast 200g`",
+                text: "❗️ *Invalid format!*\n\nUse: `chicken breast 200g`",
                 parseMode: ParseMode.Markdown,
                 cancellationToken: ct
             );
@@ -209,16 +209,20 @@ public partial class UpdateHandler
             userStateService.SetState(chatId, UserState.WaitingGoalHeight);
             await bot.SendMessage(
                 chatId,
-                text: "Enter your height (cm):",
-                cancellationToken: ct
+                text: "✏️ *Enter your height (cm):*",
+                cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
+                replyMarkup: BotKeyboards.CancelMenu()
             );
         }
         else
         {
             await bot.SendMessage(
                 chatId,
-                text: "Invalid weight! Please enter a number (e.g. 70.5):",
-                cancellationToken: ct
+                text: "❗️ *Invalid weight!*\n\nPlease enter a number (e.g. 70.5):",
+                cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
+                replyMarkup: BotKeyboards.BackToMainMenu()
             );
         }
     }
@@ -239,16 +243,20 @@ public partial class UpdateHandler
             userStateService.SetState(chatId, UserState.WaitingGoalAge);
             await bot.SendMessage(
                 chatId,
-                text: "Enter your age:",
-                cancellationToken: ct
+                text: "✏️ *Enter your age:*",
+                cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
+                replyMarkup: BotKeyboards.CancelMenu()
             );
         }
         else
         {
             await bot.SendMessage(
                 chatId,
-                text: "Invalid height! Please enter a number (e.g. 180.5):",
-                cancellationToken: ct
+                text: "❗️ *Invalid height!*\n\nPlease enter a number (e.g. 180.5):",
+                cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
+                replyMarkup: BotKeyboards.BackToMainMenu()
             );
         }
     }
@@ -269,8 +277,9 @@ public partial class UpdateHandler
             userStateService.SetState(chatId, UserState.Idle);
             await bot.SendMessage(
                 chatId,
-                text: "Choose your gender:",
+                text: "👇 *Choose your gender:*",
                 cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
                 replyMarkup: BotKeyboards.GenderMenu()
             );
         }
