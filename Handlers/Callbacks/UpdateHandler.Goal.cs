@@ -94,6 +94,32 @@ public partial class UpdateHandler
         userStateService.SetState(chatId, UserState.WaitingGoalWeight);
     }
 
+    private async Task HandleDeleteGoal(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await databaseService.DeleteGoal(chatId);
+
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "🗑️ *Goal deleted!*",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.BackToMainMenu()
+        );
+
+        userStateService.SetState(chatId, UserState.Idle);
+    }
+
     private async Task HandleSetGoal(
         ITelegramBotClient bot,
         long chatId,

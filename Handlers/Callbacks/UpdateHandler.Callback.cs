@@ -49,6 +49,9 @@ public partial class UpdateHandler
             case "goal_view":
                 await HandleGoalView(bot, chatId, messageId, ct);
                 break;
+            case "goal_delete":
+                await HandleDeleteGoal(bot, chatId, messageId, ct);
+                break;
             case "add_food":
                 await HandleAddFood(bot, chatId, messageId, ct);
                 break;

@@ -104,5 +104,15 @@ public class DatabaseService(IConfiguration configuration)
             SELECT * FROM user_goals
             WHERE chat_id = @ChatId
         ", new { ChatId = chatId });
-    } 
+    }
+
+    public async Task DeleteGoal(long chatId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+
+        await connection.ExecuteAsync(@"
+            DELETE FROM user_goals
+            WHERE chat_id = @ChatId
+        ", new { ChatId = chatId });
+    }
 }
