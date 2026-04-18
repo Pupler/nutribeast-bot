@@ -30,7 +30,7 @@ public class BotKeyboards()
 
     public static InlineKeyboardMarkup StatsMenu()
     {
-        var today_btn = InlineKeyboardButton.WithCallbackData("📊 Today", "check_today");
+        var today_btn = InlineKeyboardButton.WithCallbackData("☀️ Today", "check_today");
         var history_btn = InlineKeyboardButton.WithCallbackData("📅 History", "check_history");
         var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "main_menu");
 
@@ -50,6 +50,18 @@ public class BotKeyboards()
         return new InlineKeyboardMarkup([
             [ view_btn ],
             [ set_btn, delete_btn ],
+            [ back_btn ]
+        ]);
+    }
+
+    public static InlineKeyboardMarkup SettingsMenu()
+    {
+        var language_btn = InlineKeyboardButton.WithCallbackData("🌍 Language", "settings_language");
+        var reminders_btn = InlineKeyboardButton.WithCallbackData("🔔 Reminders", "settings_reminders");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "main_menu");
+
+        return new InlineKeyboardMarkup([
+            [ language_btn, reminders_btn ],
             [ back_btn ]
         ]);
     }

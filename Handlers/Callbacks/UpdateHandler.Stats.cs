@@ -22,7 +22,7 @@ public partial class UpdateHandler
 
         await bot.SendMessage(
             chatId,
-            text: "📊 *Stats*\n\nChoose an option 👇",
+            text: "📈 *Stats*\n\nChoose an option 👇",
             parseMode: ParseMode.Markdown,
             cancellationToken: ct,
             replyMarkup: BotKeyboards.StatsMenu()

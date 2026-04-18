@@ -46,6 +46,9 @@ public partial class UpdateHandler
             case "goal_menu":
                 await HandleGoalMenu(bot, chatId, messageId, ct);
                 break;
+            case "menu_settings":
+                await HandleSettingsMenu(bot, chatId, messageId, ct);
+                break;
             case "goal_view":
                 await HandleGoalView(bot, chatId, messageId, ct);
                 break;
@@ -122,5 +125,27 @@ public partial class UpdateHandler
         );
 
         userStateService.SetState(chatId, UserState.Idle);
+    }
+
+    private async Task HandleSettingsMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "⚙️ *Settings*\n\nWhat would you like to configure?",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.SettingsMenu()
+        );
     }
 }
