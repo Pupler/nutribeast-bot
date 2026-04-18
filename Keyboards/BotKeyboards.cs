@@ -66,6 +66,21 @@ public class BotKeyboards()
         ]);
     }
 
+    public static InlineKeyboardMarkup LanguageMenu()
+    {
+        var german_btn = InlineKeyboardButton.WithCallbackData("🇩🇪 Deutsch", "lang_de");
+        var english_btn = InlineKeyboardButton.WithCallbackData("🇬🇧 English", "lang_en");
+        var ukrainian_btn = InlineKeyboardButton.WithCallbackData("🇺🇦 Українська", "lang_ua");
+        var french_btn = InlineKeyboardButton.WithCallbackData("🇫🇷 Français", "lang_fr");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "menu_settings");
+
+        return new InlineKeyboardMarkup([
+            [ german_btn, english_btn ],
+            [ ukrainian_btn, french_btn ],
+            [ back_btn ]
+        ]);
+    }
+
     public static InlineKeyboardMarkup FoodConfirmMenu()
     {
         var add_btn = InlineKeyboardButton.WithCallbackData("✅ Add", "food_confirm_add");

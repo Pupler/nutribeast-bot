@@ -49,6 +49,9 @@ public partial class UpdateHandler
             case "menu_settings":
                 await HandleSettingsMenu(bot, chatId, messageId, ct);
                 break;
+            case "settings_language":
+                await HandleLanguageMenu(bot, chatId, messageId, ct);
+                break;
             case "goal_view":
                 await HandleGoalView(bot, chatId, messageId, ct);
                 break;
@@ -127,7 +130,7 @@ public partial class UpdateHandler
         userStateService.SetState(chatId, UserState.Idle);
     }
 
-    private async Task HandleSettingsMenu(
+    private static async Task HandleSettingsMenu(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
@@ -146,6 +149,27 @@ public partial class UpdateHandler
             cancellationToken: ct,
             parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.SettingsMenu()
+        );
+    }
+
+    private static async Task HandleLanguageMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+        await bot.SendMessage(
+            chatId,
+            text: "🌍 *Language*\n\nChoose your language:",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.LanguageMenu()
         );
     }
 }
