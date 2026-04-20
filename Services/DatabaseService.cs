@@ -31,6 +31,11 @@ public class DatabaseService(IConfiguration configuration)
                 fat REAL NOT NULL,
                 carbs REAL NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS user_reminders (
+                chat_id INTEGER PRIMARY KEY,
+                reminder_time TEXT NOT NULL,
+                is_enabled INTEGER NOT NULL DEFAULT 1
+            );
         ");
     }
 

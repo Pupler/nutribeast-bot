@@ -49,6 +49,9 @@ public partial class UpdateHandler
             case "menu_settings":
                 await HandleSettingsMenu(bot, chatId, messageId, ct);
                 break;
+            case "settings_reminders":
+                await HandleReminderMenu(bot, chatId, messageId, ct);
+                break;
             case "settings_language":
                 await HandleLanguageMenu(bot, chatId, messageId, ct);
                 break;
@@ -164,12 +167,35 @@ public partial class UpdateHandler
             messageId,
             cancellationToken: ct
         );
+
         await bot.SendMessage(
             chatId,
             text: "🌍 *Language*\n\nChoose your language:",
             cancellationToken: ct,
             parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.LanguageMenu()
+        );
+    }
+
+    private static async Task HandleReminderMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "🔔 *Reminders*\n\nChoose your daily reminder time:",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.ReminderMenu()
         );
     }
 }

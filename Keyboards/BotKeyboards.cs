@@ -66,6 +66,23 @@ public class BotKeyboards()
         ]);
     }
 
+    public static InlineKeyboardMarkup ReminderMenu()
+    {
+        var morning_btn = InlineKeyboardButton.WithCallbackData("🌅 08:00", "reminder_08");
+        var noon_btn = InlineKeyboardButton.WithCallbackData("🍽️ 12:00", "reminder_12");
+        var evening_btn = InlineKeyboardButton.WithCallbackData("🌙 18:00", "reminder_18");
+        var custom_btn = InlineKeyboardButton.WithCallbackData("✏️ Custom", "reminder_custom");
+        var toggle_btn = InlineKeyboardButton.WithCallbackData("🔔 Enable / Disable", "reminder_toggle");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "menu_settings");
+
+        return new InlineKeyboardMarkup([
+            [ morning_btn, noon_btn ],
+            [ evening_btn, custom_btn ],
+            [ toggle_btn ],
+            [ back_btn ]
+        ]);
+    }
+
     public static InlineKeyboardMarkup LanguageMenu()
     {
         var german_btn = InlineKeyboardButton.WithCallbackData("🇩🇪 Deutsch", "lang_de");
