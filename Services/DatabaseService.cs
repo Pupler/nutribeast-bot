@@ -5,13 +5,11 @@ using NutriBeastBot.Models;
 namespace NutriBeastBot.Services;
 public class DatabaseService(IConfiguration configuration)
 {
-    private readonly string _connectionString = configuration.GetConnectionString("Default")!;
+    private readonly SqliteConnection _connection = new(configuration.GetConnectionString("Default"));
     
     public async Task InitializeAsync()
     {
-        using var connection = new SqliteConnection(_connectionString);
-        
-        await connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync(@"
             CREATE TABLE IF NOT EXISTS food_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 chat_id INTEGER NOT NULL,
@@ -41,9 +39,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task LogFoodAsync(FoodLog log)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        await connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync(@"
             INSERT INTO food_logs (chat_id, name, grams, calories, protein, fat, carbs, sugar)
             VALUES (@ChatId, @Name, @Grams, @Calories, @Protein, @Fat, @Carbs, @Sugar)
         ", log);
@@ -51,9 +47,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task<IEnumerable<FoodLog>> GetTodayLogsAsync(long chatId)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        return await connection.QueryAsync<FoodLog>(@"
+        return await _connection.QueryAsync<FoodLog>(@"
             SELECT * FROM food_logs 
             WHERE chat_id = @ChatId 
             AND date(created_at) = date('now')
@@ -62,9 +56,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task<IEnumerable<string>> GetDaysWithLogsAsync(long chatId)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        return await connection.QueryAsync<string>(@"
+        return await _connection.QueryAsync<string>(@"
             SELECT DISTINCT date(created_at) as date 
             FROM food_logs 
             WHERE chat_id = @ChatId 
@@ -75,9 +67,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task<IEnumerable<FoodLog>> GetLogsByDateAsync(long chatId, string date)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        return await connection.QueryAsync<FoodLog>(@"
+        return await _connection.QueryAsync<FoodLog>(@"
             SELECT * FROM food_logs
             WHERE chat_id = @ChatId
             AND date(created_at) = @Date
@@ -86,9 +76,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task LogGoal(long chatId, MacroGoal macroGoal)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        await connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync(@"
             INSERT OR REPLACE INTO user_goals (chat_id, calories, protein, fat, carbs)
             VALUES (@ChatId, @Calories, @Protein, @Fat, @Carbs)
         ", new
@@ -103,9 +91,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task<MacroGoal?> GetGoal(long chatId)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        return await connection.QueryFirstOrDefaultAsync<MacroGoal>(@"
+        return await _connection.QueryFirstOrDefaultAsync<MacroGoal>(@"
             SELECT * FROM user_goals
             WHERE chat_id = @ChatId
         ", new { ChatId = chatId });
@@ -113,9 +99,7 @@ public class DatabaseService(IConfiguration configuration)
 
     public async Task DeleteGoal(long chatId)
     {
-        using var connection = new SqliteConnection(_connectionString);
-
-        await connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync(@"
             DELETE FROM user_goals
             WHERE chat_id = @ChatId
         ", new { ChatId = chatId });
