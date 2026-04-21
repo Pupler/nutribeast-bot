@@ -104,4 +104,21 @@ public class DatabaseService(IConfiguration configuration)
             WHERE chat_id = @ChatId
         ", new { ChatId = chatId });
     }
+
+    public async Task SetReminderAsync(long chatId, string reminderTime)
+    {
+        await _connection.ExecuteAsync(@"
+            INSERT INTO user_reminders (chat_id, reminder_time, is_enabled)
+            VALUES (@chatId, @reminderTime, 1)
+            ON CONFLICT(chat_id) DO UPDATE SET reminder_time = @reminderTime, is_enabled = 1",
+            new { chatId, reminderTime });
+    }
+
+    public async Task ToggleReminderAsync(long chatId)
+    {
+        await _connection.ExecuteAsync(@"
+            UPDATE user_reminders SET is_enabled = CASE WHEN is_enabled = 1 THEN 0 ELSE 1 END
+            WHERE chat_id = @chatId",
+            new { chatId });
+    }
 }
