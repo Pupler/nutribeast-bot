@@ -1,6 +1,7 @@
 using NutriBeastBot.Keyboards;
 using NutriBeastBot.Models;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -127,9 +128,32 @@ public partial class UpdateHandler
             case "toggle":
                 await databaseService.ToggleReminderAsync(chatId);
                 break;
-            default:
+            case "08":
+                await databaseService.SetReminderAsync(chatId, "08:00");
                 break;
+            case "12":
+                await databaseService.SetReminderAsync(chatId, "12:00");
+                break;
+            case "18":
+                await databaseService.SetReminderAsync(chatId, "18:00");
+                break;
+            default:
+                return;
         }
+
+        var isEnabled = await databaseService.IsReminderEnabledAsync(chatId);
+        var reminderTime = await databaseService.GetReminderTime(chatId);
+
+        try
+        {
+            await bot.EditMessageReplyMarkup(
+                chatId,
+                messageId,
+                replyMarkup: BotKeyboards.ReminderMenu(isEnabled, reminderTime ?? ""),
+                cancellationToken: ct
+            );
+        }
+        catch (ApiRequestException) { }
     }
 
     private async Task HandleCancel(
@@ -208,6 +232,7 @@ public partial class UpdateHandler
     )
     {
         var isEnabled = await databaseService.IsReminderEnabledAsync(chatId);
+        var reminderTime = await databaseService.GetReminderTime(chatId);
         
         await bot.DeleteMessage(
             chatId,
@@ -220,7 +245,7 @@ public partial class UpdateHandler
             text: "🔔 *Reminders*\n\nChoose your daily reminder time:",
             cancellationToken: ct,
             parseMode: ParseMode.Markdown,
-            replyMarkup: BotKeyboards.ReminderMenu(isEnabled)
+            replyMarkup: BotKeyboards.ReminderMenu(isEnabled, reminderTime ?? "")
         );
     }
 }

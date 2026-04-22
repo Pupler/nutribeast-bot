@@ -129,4 +129,12 @@ public class DatabaseService(IConfiguration configuration)
             WHERE chat_id = @chatId
         ", new { chatId });
     }
+
+    public async Task<string?> GetReminderTime(long chatId)
+    {
+        return await _connection.QueryFirstOrDefaultAsync<string>(@"
+            SELECT reminder_time FROM user_reminders
+            WHERE chat_id = @chatId
+        ", new { chatId });
+    }
 }
