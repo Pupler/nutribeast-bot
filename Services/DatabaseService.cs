@@ -110,15 +110,23 @@ public class DatabaseService(IConfiguration configuration)
         await _connection.ExecuteAsync(@"
             INSERT INTO user_reminders (chat_id, reminder_time, is_enabled)
             VALUES (@chatId, @reminderTime, 1)
-            ON CONFLICT(chat_id) DO UPDATE SET reminder_time = @reminderTime, is_enabled = 1",
-            new { chatId, reminderTime });
+            ON CONFLICT(chat_id) DO UPDATE SET reminder_time = @reminderTime, is_enabled = 1
+        ", new { chatId, reminderTime });
     }
 
     public async Task ToggleReminderAsync(long chatId)
     {
         await _connection.ExecuteAsync(@"
             UPDATE user_reminders SET is_enabled = CASE WHEN is_enabled = 1 THEN 0 ELSE 1 END
-            WHERE chat_id = @chatId",
-            new { chatId });
+            WHERE chat_id = @chatId
+        ", new { chatId });
+    }
+
+    public async Task<bool> IsReminderEnabledAsync(long chatId)
+    {
+        return await _connection.QueryFirstOrDefaultAsync<bool>(@"
+            SELECT is_enabled FROM user_reminders
+            WHERE chat_id = @chatId
+        ", new { chatId });
     }
 }

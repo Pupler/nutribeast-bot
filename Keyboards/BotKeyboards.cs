@@ -66,13 +66,15 @@ public class BotKeyboards()
         ]);
     }
 
-    public static InlineKeyboardMarkup ReminderMenu()
+    public static InlineKeyboardMarkup ReminderMenu(bool isEnabled)
     {
         var morning_btn = InlineKeyboardButton.WithCallbackData("🌅 08:00", "reminder_08");
         var noon_btn = InlineKeyboardButton.WithCallbackData("🍽️ 12:00", "reminder_12");
         var evening_btn = InlineKeyboardButton.WithCallbackData("🌙 18:00", "reminder_18");
         var custom_btn = InlineKeyboardButton.WithCallbackData("✏️ Custom", "reminder_custom");
-        var toggle_btn = InlineKeyboardButton.WithCallbackData("🔔 Enable / Disable", "reminder_toggle");
+        var toggle_btn = isEnabled
+            ? InlineKeyboardButton.WithCallbackData("🔔 Enabled", "reminder_toggle")
+            : InlineKeyboardButton.WithCallbackData("🔕 Disabled", "reminder_toggle");
         var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "menu_settings");
 
         return new InlineKeyboardMarkup([

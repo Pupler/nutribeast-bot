@@ -1,7 +1,5 @@
-using NutriBeastBot.Extensions;
 using NutriBeastBot.Keyboards;
 using NutriBeastBot.Models;
-using NutriBeastBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -105,6 +103,31 @@ public partial class UpdateHandler
                 {
                     await HandleMacroEdit(bot, chatId, data, messageId, ct);
                 }
+
+                else if (data!.StartsWith("reminder_"))
+                {
+                    await HandleReminder(bot, chatId, data, messageId, ct);
+                }
+                break;
+        }
+    }
+
+    private async Task HandleReminder(
+        ITelegramBotClient bot,
+        long chatId,
+        string data,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        var reminderData = data.Replace("reminder_", "");
+
+        switch (reminderData)
+        {
+            case "toggle":
+                await databaseService.ToggleReminderAsync(chatId);
+                break;
+            default:
                 break;
         }
     }
@@ -177,13 +200,15 @@ public partial class UpdateHandler
         );
     }
 
-    private static async Task HandleReminderMenu(
+    private async Task HandleReminderMenu(
         ITelegramBotClient bot,
         long chatId,
         int messageId,
         CancellationToken ct
     )
     {
+        var isEnabled = await databaseService.IsReminderEnabledAsync(chatId);
+        
         await bot.DeleteMessage(
             chatId,
             messageId,
@@ -195,7 +220,7 @@ public partial class UpdateHandler
             text: "🔔 *Reminders*\n\nChoose your daily reminder time:",
             cancellationToken: ct,
             parseMode: ParseMode.Markdown,
-            replyMarkup: BotKeyboards.ReminderMenu()
+            replyMarkup: BotKeyboards.ReminderMenu(isEnabled)
         );
     }
 }
