@@ -122,6 +122,14 @@ public class DatabaseService(IConfiguration configuration)
         ", new { chatId });
     }
 
+    public async Task<IEnumerable<long>> GetUsersToRemindAsync(string currentTime)
+    {
+        return await _connection.QueryAsync<long>(@"
+            SELECT chat_id FROM user_reminders
+            WHERE reminder_time = @currentTime AND is_enabled = 1",
+            new { currentTime });
+    }
+
     public async Task<bool> IsReminderEnabledAsync(long chatId)
     {
         return await _connection.QueryFirstOrDefaultAsync<bool>(@"
