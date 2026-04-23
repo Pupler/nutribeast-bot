@@ -48,6 +48,9 @@ public partial class UpdateHandler
             case UserState.WaitingFoodMacroEdit:
                 await HandleWaitingFoodMacroEdit(bot, chatId, text, ct);
                 break;
+            case UserState.WaitingCustomReminderTime:
+                await HandleWaitingCustomReminderTime(bot, chatId, text, ct);
+                break;
             default:
                 break;
         }
@@ -75,6 +78,25 @@ public partial class UpdateHandler
             default:
                 break;
         }
+    }
+
+    private async Task HandleWaitingCustomReminderTime(
+        ITelegramBotClient bot,
+        long chatId,
+        string text,
+        CancellationToken ct
+    )
+    {
+        var customReminderTime = text;
+
+        await databaseService.SetReminderAsync(chatId, customReminderTime);
+
+        await bot.SendMessage(
+            chatId,
+            text: "Custom time set!",
+            cancellationToken: ct,
+            replyMarkup: BotKeyboards.BackToMainMenu()
+        );
     }
 
     private async Task HandleWaitingFoodName(

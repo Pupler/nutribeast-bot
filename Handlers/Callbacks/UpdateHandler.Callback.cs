@@ -128,6 +128,9 @@ public partial class UpdateHandler
             case "toggle":
                 await databaseService.ToggleReminderAsync(chatId);
                 break;
+            case "custom":
+                await HandleCustomReminderTime(bot, chatId, messageId, ct);
+                break;
             case "08":
                 await databaseService.SetReminderAsync(chatId, "08:00");
                 break;
@@ -247,5 +250,29 @@ public partial class UpdateHandler
             parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.ReminderMenu(isEnabled, reminderTime ?? "")
         );
+    }
+
+    private async Task HandleCustomReminderTime(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+
+        await bot.SendMessage(
+            chatId,
+            text: "🔔 *Write your daily reminder time:*",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.CancelMenu()
+        );
+
+        userStateService.SetState(chatId, UserState.WaitingCustomReminderTime);
     }
 }

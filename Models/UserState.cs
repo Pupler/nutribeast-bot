@@ -9,5 +9,6 @@ public enum UserState
     WaitingGoalHeight,
     WaitingGoalAge,
     WaitingGoalConfirmation,
-    WaitingFoodMacroEdit
+    WaitingFoodMacroEdit,
+    WaitingCustomReminderTime
 }
