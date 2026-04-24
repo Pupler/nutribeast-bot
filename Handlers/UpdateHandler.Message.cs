@@ -87,14 +87,27 @@ public partial class UpdateHandler
         CancellationToken ct
     )
     {
-        var customReminderTime = text;
+        if (!TimeOnly.TryParseExact(text, "HH:mm", out _))
+        {
+            await bot.SendMessage(
+                chatId,
+                text: "❗️ *Invalid format!*\n\nUse: `HH:mm` (e.g. 14:30)",
+                cancellationToken: ct,
+                parseMode: ParseMode.Markdown,
+                replyMarkup: BotKeyboards.CancelMenu()
+            );
 
-        await databaseService.SetReminderAsync(chatId, customReminderTime);
+            return;
+        }
+
+        await databaseService.SetReminderAsync(chatId, text);
+        userStateService.SetState(chatId, UserState.Idle);
 
         await bot.SendMessage(
             chatId,
-            text: "Custom time set!",
+            text: $"⏰ *Reminder set to {text}!*",
             cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
             replyMarkup: BotKeyboards.BackToMainMenu()
         );
     }
