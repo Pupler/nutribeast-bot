@@ -68,6 +68,8 @@ public class BotKeyboards()
 
     public static InlineKeyboardMarkup ReminderMenu(bool isEnabled, string reminderTime)
     {
+        var predefinedTimes = new[] { "08:00", "12:00", "18:00" };
+        
         var morning_btn = reminderTime == "08:00"
             ? InlineKeyboardButton.WithCallbackData("🌅 08:00 [✅]", "reminder_08")
             : InlineKeyboardButton.WithCallbackData("🌅 08:00", "reminder_08");
@@ -80,7 +82,9 @@ public class BotKeyboards()
             ? InlineKeyboardButton.WithCallbackData("🌙 18:00 [✅]", "reminder_18")
             : InlineKeyboardButton.WithCallbackData("🌙 18:00", "reminder_18");
 
-        var custom_btn = InlineKeyboardButton.WithCallbackData("✏️ Custom", "reminder_custom");
+        var custom_btn = reminderTime != "" && !predefinedTimes.Contains(reminderTime)
+            ? InlineKeyboardButton.WithCallbackData($"⏰ {reminderTime} [✅]", "reminder_custom")
+            : InlineKeyboardButton.WithCallbackData("✏️ Custom", "reminder_custom");
         var toggle_btn = isEnabled
             ? InlineKeyboardButton.WithCallbackData("🔔 Enabled", "reminder_toggle")
             : InlineKeyboardButton.WithCallbackData("🔕 Disabled", "reminder_toggle");
