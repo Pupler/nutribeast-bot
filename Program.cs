@@ -24,6 +24,7 @@ builder.Services.AddHttpClient<FoodApiService>(client =>
         TimeSpan.FromSeconds(retryAttempt)));
 
 builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<ReminderService>();
 
 var host = builder.Build();
 

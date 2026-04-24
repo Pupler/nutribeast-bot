@@ -19,7 +19,7 @@ public class ReminderService(
             {
                 await bot.SendMessage(
                     chatId,
-                    text: "🔔 *Reminder*\n\nDon't forget to log your meals today! 🍽️",
+                    text: "🔔 *Reminder* 🔔\n\nDon't forget to log your meals today! 🍽️",
                     parseMode: ParseMode.Markdown,
                     cancellationToken: ct
                 );
