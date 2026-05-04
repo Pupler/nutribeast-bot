@@ -34,6 +34,16 @@ public class DatabaseService(IConfiguration configuration)
                 reminder_time TEXT NOT NULL,
                 is_enabled INTEGER NOT NULL DEFAULT 1
             );
+            CREATE TABLE IF NOT EXISTS user_food_presets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                calories REAL NOT NULL,
+                protein REAL NOT NULL,
+                fat REAL NOT NULL,
+                carbs REAL NOT NULL,
+                sugar REAL NOT NULL DEFAULT 0
+            );
         ");
     }
 
@@ -144,5 +154,29 @@ public class DatabaseService(IConfiguration configuration)
             SELECT reminder_time FROM user_reminders
             WHERE chat_id = @chatId
         ", new { chatId });
+    }
+
+    public async Task SaveFoodPresetAsync(long chatId, FoodLog foodLog)
+    {
+        await _connection.ExecuteAsync(@"
+            INSERT INTO user_food_presets (chat_id, name, calories, protein, fat, carbs, sugar)
+            VALUES (@chatId, @Name, @Calories, @Protein, @Fat, @Carbs, @Sugar)
+        ", new { chatId, foodLog.Name, foodLog.Calories, foodLog.Protein, foodLog.Fat, foodLog.Carbs, foodLog.Sugar });
+    }
+
+    public async Task<IEnumerable<FoodLog>> GetFoodPresetsAsync(long chatId)
+    {
+        return await _connection.QueryAsync<FoodLog>(@"
+            SELECT * FROM user_food_presets
+            WHERE chat_id = @chatId
+        ", new { chatId });
+    }
+
+    public async Task DeleteFoodPresetAsync(long chatId, int id)
+    {
+        await _connection.ExecuteAsync(@"
+            DELETE FROM user_food_presets
+            WHERE chat_id = @chatId AND id = @id
+        ", new { chatId, id });
     }
 }
