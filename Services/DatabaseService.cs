@@ -156,17 +156,17 @@ public class DatabaseService(IConfiguration configuration)
         ", new { chatId });
     }
 
-    public async Task SaveFoodPresetAsync(long chatId, FoodLog foodLog)
+    public async Task SaveFoodPresetAsync(long chatId, FoodPreset foodPreset)
     {
         await _connection.ExecuteAsync(@"
             INSERT INTO user_food_presets (chat_id, name, calories, protein, fat, carbs, sugar)
             VALUES (@chatId, @Name, @Calories, @Protein, @Fat, @Carbs, @Sugar)
-        ", new { chatId, foodLog.Name, foodLog.Calories, foodLog.Protein, foodLog.Fat, foodLog.Carbs, foodLog.Sugar });
+        ", new { chatId, foodPreset.Name, foodPreset.Calories, foodPreset.Protein, foodPreset.Fat, foodPreset.Carbs, foodPreset.Sugar });
     }
 
-    public async Task<IEnumerable<FoodLog>> GetFoodPresetsAsync(long chatId)
+    public async Task<IEnumerable<FoodPreset>> GetFoodPresetsAsync(long chatId)
     {
-        return await _connection.QueryAsync<FoodLog>(@"
+        return await _connection.QueryAsync<FoodPreset>(@"
             SELECT * FROM user_food_presets
             WHERE chat_id = @chatId
         ", new { chatId });
