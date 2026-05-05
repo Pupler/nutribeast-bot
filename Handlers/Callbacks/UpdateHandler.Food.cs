@@ -29,8 +29,30 @@ public partial class UpdateHandler
             replyMarkup: BotKeyboards.FoodMenu()
         );
     }
+
+    private static async Task HandleAddFoodMenu(
+        ITelegramBotClient bot,
+        long chatId,
+        int messageId,
+        CancellationToken ct
+    )
+    {
+        await bot.DeleteMessage(
+            chatId,
+            messageId,
+            cancellationToken: ct
+        );
+        
+        await bot.SendMessage(
+            chatId,
+            text: "🍗 *Add Food*\n\nHow would you like to add food? 👇",
+            cancellationToken: ct,
+            parseMode: ParseMode.Markdown,
+            replyMarkup: BotKeyboards.AddFoodMenu()
+        );
+    }
     
-    private async Task HandleAddFood(
+    private async Task HandleAddFoodAuto(
         ITelegramBotClient bot,
         long chatId,
         int messageId,

@@ -61,7 +61,10 @@ public partial class UpdateHandler
                 await HandleDeleteGoal(bot, chatId, messageId, ct);
                 break;
             case "add_food":
-                await HandleAddFood(bot, chatId, messageId, ct);
+                await HandleAddFoodMenu(bot, chatId, messageId, ct);
+                break;
+            case "add_food_auto":
+                await HandleAddFoodAuto(bot, chatId, messageId, ct);
                 break;
             case "food_edit":
                 await HandleFoodEdit(bot, chatId, messageId, ct);

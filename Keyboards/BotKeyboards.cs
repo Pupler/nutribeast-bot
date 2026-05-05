@@ -28,6 +28,21 @@ public class BotKeyboards()
         ]);
     }
 
+    public static InlineKeyboardMarkup AddFoodMenu()
+    {
+        var auto_btn = InlineKeyboardButton.WithCallbackData("🔍 Auto search", "add_food_auto");
+        var manual_btn = InlineKeyboardButton.WithCallbackData("✏️ Manual entry", "food_manual");
+        var presets_btn = InlineKeyboardButton.WithCallbackData("📋 My saved foods", "food_presets");
+        var back_btn = InlineKeyboardButton.WithCallbackData("🔙 Back", "menu_food");
+
+        return new InlineKeyboardMarkup([
+            [ auto_btn ],
+            [ manual_btn ],
+            [ presets_btn ],
+            [ back_btn ]
+        ]);
+    }
+
     public static InlineKeyboardMarkup StatsMenu()
     {
         var today_btn = InlineKeyboardButton.WithCallbackData("☀️ Today", "check_today");
